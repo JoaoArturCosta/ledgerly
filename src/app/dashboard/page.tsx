@@ -1,11 +1,7 @@
-import DashboardLayout from "@/components/DashboardLayout";
+import Layout from "@/components/Layout";
 
 const Dashboard = () => {
-  return (
-    <main className="flex h-screen w-screen items-center justify-center">
-      <DashboardLayout>Content</DashboardLayout>
-    </main>
-  );
+  return <Layout>Content</Layout>;
 };
 
 export default Dashboard;

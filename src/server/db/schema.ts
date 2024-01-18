@@ -1,6 +1,7 @@
-import { InferSelectModel, relations, sql } from "drizzle-orm";
+import { type InferSelectModel, relations, sql } from "drizzle-orm";
 import {
   bigint,
+  boolean,
   index,
   int,
   mysqlTableCreator,
@@ -35,6 +36,112 @@ export const posts = mysqlTable(
     nameIndex: index("name_idx").on(example.name),
   }),
 );
+
+export const incomeCategories = mysqlTable("incomeCategory", {
+  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+  name: varchar("name", { length: 256 }),
+  iconFaName: varchar("iconFaName", { length: 255 }),
+  createdById: varchar("createdById", { length: 255 }).notNull(),
+  createdAt: timestamp("created_at")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp("updatedAt").onUpdateNow(),
+});
+
+export type IncomeCategory = InferSelectModel<typeof incomeCategories>;
+
+export const incomes = mysqlTable("income", {
+  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+  name: varchar("name", { length: 256 }),
+  amount: int("amount").notNull(),
+  incomeCategoryId: bigint("incomeCategoryId", { mode: "number" }).notNull(),
+  isRecurring: boolean("isRecurring").notNull(),
+  relatedDate: timestamp("relatedDate").notNull(),
+  createdById: varchar("createdById", { length: 255 }).notNull(),
+  createdAt: timestamp("created_at")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp("updatedAt").onUpdateNow(),
+});
+
+export const incomesRelations = relations(incomes, ({ one }) => ({
+  incomeCategory: one(incomeCategories, {
+    fields: [incomes.incomeCategoryId],
+    references: [incomeCategories.id],
+  }),
+  user: one(users, { fields: [incomes.createdById], references: [users.id] }),
+}));
+
+export const expenseCategories = mysqlTable("expenseCategory", {
+  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+  name: varchar("name", { length: 256 }),
+  iconFaName: varchar("iconFaName", { length: 255 }),
+  createdById: varchar("createdById", { length: 255 }).notNull(),
+  createdAt: timestamp("created_at")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp("updatedAt").onUpdateNow(),
+});
+
+export type ExpenseCategory = InferSelectModel<typeof expenseCategories>;
+
+export const expenseSubCategories = mysqlTable("expenseSubCategory", {
+  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+  name: varchar("name", { length: 256 }),
+  expenseCategoryId: bigint("expenseCategoryId", {
+    mode: "number",
+  }).notNull(),
+  iconFaName: varchar("iconFaName", { length: 255 }),
+  createdById: varchar("createdById", { length: 255 }).notNull(),
+  createdAt: timestamp("created_at")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp("updatedAt").onUpdateNow(),
+});
+
+export type ExpenseSubCategory = InferSelectModel<typeof expenseSubCategories>;
+
+export const expenseSubCategoriesRelations = relations(
+  expenseSubCategories,
+  ({ one }) => ({
+    expenseCategory: one(expenseCategories, {
+      fields: [expenseSubCategories.expenseCategoryId],
+      references: [expenseCategories.id],
+    }),
+  }),
+);
+
+export const expenses = mysqlTable("expense", {
+  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+  name: varchar("name", { length: 256 }),
+  amount: int("amount").notNull(),
+  description: text("description"),
+  expenseCategoryId: bigint("expenseCategoryId", {
+    mode: "number",
+  }).notNull(),
+  expenseSubCategoryId: bigint("expenseSubCategoryId", {
+    mode: "number",
+  }).notNull(),
+  isRecurring: boolean("isRecurring").notNull(),
+  relatedDate: timestamp("relatedDate"),
+  createdById: varchar("createdById", { length: 255 }).notNull(),
+  createdAt: timestamp("created_at")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp("updatedAt").onUpdateNow(),
+});
+
+export const expensesRelations = relations(expenses, ({ one }) => ({
+  expenseCategory: one(expenseCategories, {
+    fields: [expenses.expenseCategoryId],
+    references: [expenseCategories.id],
+  }),
+  expenseSubCategory: one(expenseSubCategories, {
+    fields: [expenses.expenseSubCategoryId],
+    references: [expenseSubCategories.id],
+  }),
+  user: one(users, { fields: [expenses.createdById], references: [users.id] }),
+}));
 
 export const users = mysqlTable("user", {
   id: varchar("id", { length: 255 }).notNull().primaryKey(),
@@ -72,7 +179,9 @@ export const accounts = mysqlTable(
     session_state: varchar("session_state", { length: 255 }),
   },
   (account) => ({
-    compoundKey: primaryKey(account.provider, account.providerAccountId),
+    compoundKey: primaryKey({
+      columns: [account.provider, account.providerAccountId],
+    }),
     userIdIdx: index("userId_idx").on(account.userId),
   }),
 );

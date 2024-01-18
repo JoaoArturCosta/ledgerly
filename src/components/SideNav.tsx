@@ -12,28 +12,29 @@ import {
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "./ui/button";
-import { Boxes, ChevronDownIcon } from "lucide-react";
+import { Boxes } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 interface SideNavProps {
-  isOpen?: boolean;
+  isCollapsed?: boolean;
   setOpen?: (open: boolean) => void;
   className?: string;
 }
 
-const SideNav = ({ isOpen, setOpen, className }: SideNavProps) => {
+const SideNav = ({ isCollapsed, setOpen, className }: SideNavProps) => {
   const path = usePathname();
   const [openItem, setOpenItem] = useState("");
-  const [lastOpenItem, setLastOpenItem] = useState("");
-
   return (
-    <nav className="space-y-2">
+    <nav className={cn(`space-y-2`, isCollapsed && "duration-500")}>
       <Link
         href="/"
-        className="hidden items-center justify-items-start gap-2 px-4 pb-6 md:flex"
+        className={cn(
+          `flex items-center justify-items-start gap-2 pb-6`,
+          isCollapsed && "justify-center gap-0",
+        )}
       >
-        <Boxes className="h-6 w-6" />
-        <h1 className="text-lg font-semibold">Ledgerly</h1>
+        <Boxes className="h-8 w-8" />
+        {!isCollapsed && <h1 className=" text-lg font-semibold ">Ledgerly</h1>}
       </Link>
       {NavItems.map((item) =>
         item.isChidren ? (
@@ -49,24 +50,27 @@ const SideNav = ({ isOpen, setOpen, className }: SideNavProps) => {
               <AccordionTrigger
                 className={cn(
                   buttonVariants({ variant: "ghost" }),
-                  "group relative flex h-12 justify-between px-4 py-2 text-base duration-200 hover:bg-muted hover:no-underline",
+                  "group relative flex h-12 justify-between gap-2 px-2 py-2 text-sm duration-200 hover:bg-muted hover:no-underline",
+                  isCollapsed && "items-center justify-center gap-0",
                 )}
               >
                 <div>
-                  <item.icon className={cn("h-5 w-5", item.color)} />
+                  <item.icon className={cn("h-7 w-7", item.color)} />
                 </div>
-                <div
-                  className={cn(
-                    "absolute left-12 text-base duration-200",
-                    !isOpen && className,
-                  )}
-                >
-                  {item.title}
-                </div>
-
-                {isOpen && (
-                  <ChevronDownIcon className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200" />
+                {!isCollapsed && (
+                  <div
+                    className={cn(
+                      "absolute left-10 text-base duration-200",
+                      isCollapsed && "hidden",
+                    )}
+                  >
+                    {item.title}
+                  </div>
                 )}
+
+                {/* {!isCollapsed && (
+                  <ChevronDownIcon className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200" />
+                )} */}
               </AccordionTrigger>
               <AccordionContent className="ml-4 mt-2 space-y-2 pb-1">
                 {item.children?.map((child) => (
@@ -88,7 +92,7 @@ const SideNav = ({ isOpen, setOpen, className }: SideNavProps) => {
                     <div
                       className={cn(
                         "text-base duration-200",
-                        !isOpen && className,
+                        !isCollapsed && className,
                       )}
                     >
                       {child.title}
@@ -107,19 +111,22 @@ const SideNav = ({ isOpen, setOpen, className }: SideNavProps) => {
             }}
             className={cn(
               buttonVariants({ variant: "ghost" }),
-              "group relative flex h-12 justify-start",
-              path === item.href && "bg-muted font-bold hover:bg-muted",
+              "group relative flex h-12 justify-start gap-2 px-2",
+              path === item.href && "bg-muted  hover:bg-muted",
+              // isCollapsed && "items-center justify-center",
             )}
           >
-            <item.icon className={cn("h-5 w-5", item.color)} />
-            <span
-              className={cn(
-                "absolute left-12 text-base duration-200",
-                !isOpen && className,
-              )}
-            >
-              {item.title}
-            </span>
+            <item.icon className={cn("h-6 w-6", item.color)} />
+            {!isCollapsed && (
+              <div
+                className={cn(
+                  " left-12 text-sm duration-200",
+                  isCollapsed && "hidden",
+                )}
+              >
+                {item.title}
+              </div>
+            )}
           </Link>
         ),
       )}
