@@ -40,4 +40,30 @@ export const expenseRouter = createTRPCRouter({
 
       return { success: true };
     }),
+
+  getExpensesByMonth: protectedProcedure
+    .input(
+      z.object({
+        relatedDate: z.date(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const expenses = await ctx.db.query.expenses.findMany({
+        where: (expenses, { and, eq, or }) =>
+          or(
+            and(
+              eq(expenses.createdById, ctx.session.user.id),
+              eq(expenses.relatedDate, input.relatedDate),
+            ),
+            eq(expenses.isRecurring, true),
+          ),
+        with: {
+          expenseCategory: true,
+          expenseSubCategory: true,
+        },
+        orderBy: (expenses, { asc }) => [asc(expenses.createdAt)],
+      });
+
+      return expenses;
+    }),
 });

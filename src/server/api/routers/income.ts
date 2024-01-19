@@ -33,6 +33,30 @@ export const incomeRouter = createTRPCRouter({
       return { success: true };
     }),
 
+  getIncomesByMonth: protectedProcedure
+    .input(
+      z.object({
+        relatedDate: z.date(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const incomes = await ctx.db.query.incomes.findMany({
+        where: (incomes, { and, eq, or }) =>
+          or(
+            and(
+              eq(incomes.createdById, ctx.session.user.id),
+              eq(incomes.relatedDate, input.relatedDate),
+            ),
+            eq(incomes.isRecurring, true),
+          ),
+        with: {
+          incomeCategory: true,
+        },
+      });
+
+      return incomes;
+    }),
+
   // hello: publicProcedure
   //   .input(z.object({ text: z.string() }))
   //   .query(({ input }) => {

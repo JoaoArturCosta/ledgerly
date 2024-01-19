@@ -36,12 +36,13 @@ import {
   FormLabel,
   FormMessage,
 } from "./ui/form";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { format } from "date-fns";
 
 export function IncomeDialog() {
   const { toast } = useToast();
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   const [, setOpen] = useState(false);
 
@@ -89,6 +90,7 @@ export function IncomeDialog() {
     submit({
       ...data,
     });
+    router.refresh();
   };
 
   return (

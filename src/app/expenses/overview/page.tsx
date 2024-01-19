@@ -1,3 +1,5 @@
+import { DataBarChart } from "@/components/DataBarChart";
+import { DynamicFaIcon } from "@/components/DynamicFaIcon";
 import { ExpensesDialog } from "@/components/ExpensesDialog";
 import { IncomeDialog } from "@/components/IncomeDialog";
 import Layout from "@/components/Layout";
@@ -9,24 +11,64 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { DollarSign, PiggyBank, Receipt } from "lucide-react";
-import { type ReadonlyURLSearchParams } from "next/navigation";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { api } from "@/trpc/server";
+import { format } from "date-fns";
+import { DollarSign, PiggyBank, Receipt, X } from "lucide-react";
+import { useMemo } from "react";
 
 interface ExpensesProps {
-  searchParams: ReadonlyURLSearchParams;
+  searchParams: {
+    month: string;
+  };
 }
 
-const Expenses = ({ searchParams }: ExpensesProps) => {
+const Expenses = async ({ searchParams }: ExpensesProps) => {
+  const relatedDate = useMemo(() => {
+    if (searchParams.month) {
+      const date = new Date(format(searchParams.month, "yyyy-MM-dd"));
+      return date;
+    }
+
+    const date = new Date();
+    return new Date(date.getFullYear(), date.getMonth(), 1);
+  }, [searchParams]);
+
+  const allIncomes = await api.income.getIncomesByMonth.query({
+    relatedDate: new Date(relatedDate),
+  });
+
+  const totalIncome = allIncomes.reduce((acc, income) => {
+    return acc + income.amount;
+  }, 0);
+
+  const allExpenses = await api.expense.getExpensesByMonth.query({
+    relatedDate: new Date(relatedDate),
+  });
+
+  const totalExpenses = allExpenses.reduce((acc, expense) => {
+    return acc + expense.amount;
+  }, 0);
+
+  const totalSavings = 1000;
+
   const cardsList = [
     {
       title: "Total Income",
-      value: "$ 1000",
+      value: `$ ${totalIncome}`,
       icon: DollarSign,
       action: IncomeDialog,
     },
     {
       title: "Total Expenses",
-      value: "$ 1000",
+      value: `$ ${totalExpenses}`,
       icon: Receipt,
       action: ExpensesDialog,
     },
@@ -34,26 +76,108 @@ const Expenses = ({ searchParams }: ExpensesProps) => {
       title: "Total Savings",
       value: "$ 1000",
       icon: PiggyBank,
+      description: `Savings Rate: ${Math.round(
+        (totalSavings / totalIncome) * 100,
+      )}%`,
+    },
+  ];
+
+  const barChartData = [
+    {
+      name: format(relatedDate, "MMMM yyyy").toString(),
+      Income: totalIncome.toString(),
+      Expenses: totalExpenses.toString(),
+      Savings: totalSavings.toString(),
+      Unallocated: (totalIncome - (totalExpenses + totalSavings)).toString(),
     },
   ];
 
   return (
     <Layout title="Income & Expenses" viewsList={VIEWS_LIST}>
-      <section className="flex gap-4 pt-10">
+      <section className="grid grid-cols-4 gap-4 pt-10">
         {cardsList.map((card) => (
           <Card key={card.title}>
             <CardHeader>
-              <CardDescription>
-                <span className="flex items-center gap-20">
+              <CardTitle className="text-sm font-normal tracking-tight text-primary dark:text-accent-foreground">
+                <span className="flex items-center gap-28 ">
                   {card.title}
                   <card.icon className="h-4 w-4" />
                 </span>
+              </CardTitle>
+              <CardDescription className="text-normal text-3xl font-bold">
+                {card.value}
+                {card.description && (
+                  <p className="text-xs font-normal text-muted-foreground">
+                    {card.description}
+                  </p>
+                )}
               </CardDescription>
-              <CardTitle className="text-3xl">{card.value}</CardTitle>
             </CardHeader>
             <CardContent>{card.action && <card.action />}</CardContent>
           </Card>
         ))}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-normal tracking-tight text-primary dark:text-accent-foreground">
+              <span className="flex items-center gap-28 ">
+                Total Remaining
+                <X className="h-4 w-4" />
+              </span>
+            </CardTitle>
+            <CardDescription className="text-normal text-3xl font-bold">
+              ${totalIncome - (totalExpenses + totalSavings)}
+              <p className="text-xs font-normal text-muted-foreground">
+                Total Allocated ${totalExpenses + totalSavings}
+              </p>
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </section>
+      <section className="grid grid-flow-col grid-cols-8 gap-4 pt-4">
+        <div className="col-span-5 ">
+          <Card>
+            <CardHeader>
+              <CardTitle>Overview</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <DataBarChart data={barChartData} height={400} maxBars={15} />
+            </CardContent>
+          </Card>
+        </div>
+        <div className="col-span-3  ">
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Expenses</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Amount</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {allExpenses.slice(0, 10).map((expense) => (
+                    <TableRow key={expense.id}>
+                      <TableCell>
+                        <span className="flex items-center gap-2">
+                          <DynamicFaIcon
+                            name={expense.expenseSubCategory.iconFaName}
+                            className="h-4 w-4"
+                          />
+                          {expense.description ??
+                            expense.expenseSubCategory.name}
+                        </span>
+                      </TableCell>
+                      <TableCell>{expense.amount} $</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </div>
       </section>
     </Layout>
   );
