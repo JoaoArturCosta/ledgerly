@@ -8,3 +8,9 @@ export interface NavItem {
   isChidren?: boolean;
   children?: NavItem[];
 }
+
+export interface IBarChartData {
+  name: string;
+  // [key: string]: number | string;
+  Total: number;
+}

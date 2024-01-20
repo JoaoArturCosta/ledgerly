@@ -35,7 +35,7 @@ import {
   FormLabel,
   FormMessage,
 } from "./ui/form";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { format } from "date-fns";
 import {
   ExpenseValidator,
@@ -48,6 +48,7 @@ type ExpenseCategoryWithSubCategories = ExpenseCategory & {
 
 export function ExpensesDialog() {
   const { toast } = useToast();
+  const router = useRouter();
   const searchParams = useSearchParams();
 
   const [, setOpen] = useState(false);
@@ -95,14 +96,17 @@ export function ExpensesDialog() {
     [] as ExpenseCategoryWithSubCategories[],
   );
 
+  const selectedCategoryId = form.getValues().expenseCategoryId;
+
   const selectedCategory = useMemo(
     () =>
       expenseCategoriesList?.find(
-        (category) =>
-          category.id === parseInt(form.getValues().expenseCategoryId),
+        (category) => category.id === parseInt(selectedCategoryId),
       ),
-    [form, expenseCategoriesList],
+    [selectedCategoryId, expenseCategoriesList],
   );
+
+  const watchCategory = form.watch("expenseCategoryId");
 
   const { mutate: submit } = api.expense.create.useMutation({
     onSuccess: async () => {
@@ -115,6 +119,8 @@ export function ExpensesDialog() {
           )?.name
         } to your income.`,
       });
+      router.refresh();
+      form.reset();
     },
     onError: () => {
       toast({
@@ -139,9 +145,9 @@ export function ExpensesDialog() {
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Add new income</DialogTitle>
+          <DialogTitle>Add new Expense</DialogTitle>
           <DialogDescription>
-            Any income that you make will be added to your total income.
+            Any Expense that you make will be added to your total expense.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -149,6 +155,43 @@ export function ExpensesDialog() {
             className="flex flex-col gap-3"
             onSubmit={form.handleSubmit(onSubmit)}
           >
+            <FormField
+              control={form.control}
+              name="expenseCategoryId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel htmlFor="expenseCategoryId">Category</FormLabel>
+                  <SelectCategories
+                    categoriesList={expenseCategoriesList as ExpenseCategory[]}
+                    onValueChange={field.onChange}
+                    defaultValue={field.value.toString()}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {watchCategory && (
+              <FormField
+                control={form.control}
+                name="expenseSubCategoryId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel htmlFor="expenseSubCategoryId">Type</FormLabel>
+                    <SelectCategories
+                      categoriesList={
+                        selectedCategory?.subCategories ??
+                        ([] as ExpenseSubCategory[])
+                      }
+                      label="type"
+                      onValueChange={field.onChange}
+                      defaultValue={field.value.toString()}
+                    />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
             <FormField
               control={form.control}
               name="description"
@@ -178,41 +221,6 @@ export function ExpensesDialog() {
                       }
                     />
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="expenseCategoryId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel htmlFor="expenseCategoryId">Category</FormLabel>
-                  <SelectCategories
-                    categoriesList={expenseCategoriesList as ExpenseCategory[]}
-                    onValueChange={field.onChange}
-                    defaultValue={field.value.toString()}
-                  />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="expenseSubCategoryId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel htmlFor="expenseSubCategoryId">Type</FormLabel>
-                  <SelectCategories
-                    categoriesList={
-                      selectedCategory?.subCategories ??
-                      ([] as ExpenseSubCategory[])
-                    }
-                    label="type"
-                    onValueChange={field.onChange}
-                    defaultValue={field.value.toString()}
-                  />
                   <FormMessage />
                 </FormItem>
               )}

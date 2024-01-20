@@ -1,4 +1,5 @@
 import { DataBarChart } from "@/components/DataBarChart";
+import DataLineChart from "@/components/DataLineChart";
 import { DynamicFaIcon } from "@/components/DynamicFaIcon";
 import { IncomeDialog } from "@/components/IncomeDialog";
 import Layout from "@/components/Layout";
@@ -14,6 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { api } from "@/trpc/server";
+import { type IBarChartData } from "@/types";
 import { format } from "date-fns";
 import { DollarSign } from "lucide-react";
 import { useMemo } from "react";
@@ -22,11 +24,6 @@ interface ExpensesProps {
   searchParams: {
     month: string;
   };
-}
-
-interface IncomeOverviewBarChartData {
-  name: string;
-  [key: string]: number | string;
 }
 
 export async function Income({ searchParams }: ExpensesProps) {
@@ -40,40 +37,65 @@ export async function Income({ searchParams }: ExpensesProps) {
     return new Date(date.getFullYear(), date.getMonth(), 1);
   }, [searchParams]);
 
-  const allIncomes = await api.income.getIncomesByMonth.query({
+  const allIncomesForCurrentMonth = await api.income.getIncomesByMonth.query({
     relatedDate: new Date(relatedDate),
   });
 
-  const barChartData = allIncomes.reduce(
-    (acc: IncomeOverviewBarChartData, income) => {
+  const incomesByMonth = await api.income.getIncomesByYear.query({
+    relatedDate: new Date(relatedDate),
+  });
+
+  const lineChartData = Object.entries(incomesByMonth).map((income) => {
+    return {
+      name: income[0],
+      Salary: 0,
+      Bonus: 0,
+      Freelance: 0,
+      Dividends: 0,
+      Interest: 0,
+      "Business Profits": 0,
+      Other: 0,
+      ...income[1],
+    };
+  });
+
+  const barChartData = allIncomesForCurrentMonth.reduce(
+    (acc: IBarChartData[], income) => {
       const incomeCategory = income.incomeCategory.name!;
       const amount = income.amount;
 
-      if (acc[incomeCategory] === undefined) {
-        return {
+      if (acc.some((item) => item.name === incomeCategory) === false) {
+        return [
           ...acc,
-          [incomeCategory]: amount,
-        };
+          {
+            name: incomeCategory,
+            Total: amount,
+          },
+        ];
       }
 
-      return {
-        ...acc,
-        [incomeCategory]: Number(acc[incomeCategory]) + amount,
-      };
+      const index = acc.findIndex((item) => item.name === incomeCategory);
+
+      if (acc[index] === undefined) {
+        return acc;
+      }
+
+      acc[index]!.Total += amount;
+
+      return acc;
     },
-    {
-      name: format(relatedDate, "MMMM yyyy"),
-    } as IncomeOverviewBarChartData,
+
+    [] as IBarChartData[],
   );
 
-  const totalIncome = allIncomes.reduce((acc, income) => {
+  const totalIncome = allIncomesForCurrentMonth.reduce((acc, income) => {
     return acc + income.amount;
   }, 0);
 
   return (
     <Layout title="Income & Expenses" viewsList={VIEWS_LIST}>
       <section className="grid  grid-cols-8 gap-4  pt-10">
-        <Card className="min-h[ col-span-5">
+        <Card className=" col-span-5">
           <CardHeader>
             <CardTitle className=" font-normal tracking-tight">
               <span className="flex items-center justify-between">
@@ -94,7 +116,7 @@ export async function Income({ searchParams }: ExpensesProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {allIncomes.map((income) => (
+                {allIncomesForCurrentMonth.map((income) => (
                   <TableRow key={income.id}>
                     <TableCell>
                       <span className="flex items-center gap-2">
@@ -128,7 +150,7 @@ export async function Income({ searchParams }: ExpensesProps) {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <DataBarChart data={[barChartData]} height={240} maxBars={7} />
+              <DataBarChart data={barChartData} height={240} maxBars={7} />
             </CardContent>
           </Card>
           <Card>
@@ -137,7 +159,9 @@ export async function Income({ searchParams }: ExpensesProps) {
                 Income Progress
               </CardTitle>
             </CardHeader>
-            <CardContent></CardContent>
+            <CardContent>
+              <DataLineChart data={lineChartData} height={240} />
+            </CardContent>
           </Card>
         </div>
       </section>

@@ -41,11 +41,11 @@ const Expenses = async ({ searchParams }: ExpensesProps) => {
     return new Date(date.getFullYear(), date.getMonth(), 1);
   }, [searchParams]);
 
-  const allIncomes = await api.income.getIncomesByMonth.query({
+  const allIncomesForCurrentMonth = await api.income.getIncomesByMonth.query({
     relatedDate: new Date(relatedDate),
   });
 
-  const totalIncome = allIncomes.reduce((acc, income) => {
+  const totalIncome = allIncomesForCurrentMonth.reduce((acc, income) => {
     return acc + income.amount;
   }, 0);
 

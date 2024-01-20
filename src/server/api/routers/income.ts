@@ -6,6 +6,7 @@ import {
   publicProcedure,
 } from "@/server/api/trpc";
 import { incomes } from "@/server/db/schema";
+import { format } from "date-fns";
 
 export const incomeRouter = createTRPCRouter({
   getAllCategories: publicProcedure.query(({ ctx }) => {
@@ -55,6 +56,88 @@ export const incomeRouter = createTRPCRouter({
       });
 
       return incomes;
+    }),
+
+  getIncomesByYear: protectedProcedure
+    .input(
+      z.object({
+        relatedDate: z.date(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const year = input.relatedDate.getFullYear();
+
+      const incomes = await ctx.db.query.incomes.findMany({
+        where: (incomes, { and, eq, or, between }) =>
+          or(
+            and(
+              eq(incomes.createdById, ctx.session.user.id),
+              between(
+                incomes.relatedDate,
+                new Date(year, 0, 1),
+                new Date(year, 11, 31),
+              ),
+            ),
+            eq(incomes.isRecurring, true),
+          ),
+        with: {
+          incomeCategory: true,
+        },
+      });
+
+      const incomesByMonth = incomes.reduce(
+        (
+          acc: Record<string, { Total: number; [key: string]: number }>,
+          income,
+        ) => {
+          const month = format(income.relatedDate, "MMM");
+          const amount = income.amount;
+
+          if (income.isRecurring) {
+            for (let i = 0; i < 12; i++) {
+              const date = new Date(year, i, 1);
+              const month = format(date, "MMM");
+              if (!acc[month]) {
+                acc[month] = {
+                  [income.incomeCategory.name!]: amount,
+                  Total: amount,
+                };
+              } else if (acc[month]) {
+                if (!acc[month]![income.incomeCategory.name!]) {
+                  acc[month]![income.incomeCategory.name!] = amount;
+                }
+                acc[month]!.Total += amount;
+              }
+            }
+            return acc;
+          }
+
+          if (!acc[month]) {
+            acc[month] = {
+              [income.incomeCategory.name!]: amount,
+              Total: amount,
+            };
+          }
+
+          if (acc[month]) {
+            if (!acc[month]![income.incomeCategory.name!]) {
+              acc[month]![income.incomeCategory.name!] = amount;
+            } else {
+              acc[month]![income.incomeCategory.name!] += amount;
+            }
+            acc[month]!.Total += amount;
+          }
+
+          return acc;
+        },
+        {
+          Jan: {
+            Total: 0,
+          },
+        },
+      );
+
+      return incomesByMonth;
     }),
 
   // hello: publicProcedure

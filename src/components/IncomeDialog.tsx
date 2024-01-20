@@ -77,6 +77,8 @@ export function IncomeDialog() {
           )?.name
         } to your income.`,
       });
+      router.refresh();
+      form.reset();
     },
     onError: () => {
       toast({
@@ -90,7 +92,6 @@ export function IncomeDialog() {
     submit({
       ...data,
     });
-    router.refresh();
   };
 
   return (
@@ -114,6 +115,22 @@ export function IncomeDialog() {
           >
             <FormField
               control={form.control}
+              name="incomeCategoryId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel htmlFor="incomeCategoryId">Category</FormLabel>
+                  <SelectCategories
+                    categoriesList={incomeCategories as IncomeCategory[]}
+                    onValueChange={field.onChange}
+                    defaultValue={field.value.toString()}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="amount"
               render={({ field }) => (
                 <FormItem>
@@ -128,22 +145,6 @@ export function IncomeDialog() {
                       }
                     />
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="incomeCategoryId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel htmlFor="incomeCategoryId">Category</FormLabel>
-                  <SelectCategories
-                    categoriesList={incomeCategories as IncomeCategory[]}
-                    onValueChange={field.onChange}
-                    defaultValue={field.value.toString()}
-                  />
                   <FormMessage />
                 </FormItem>
               )}

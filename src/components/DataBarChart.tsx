@@ -1,20 +1,19 @@
 "use client";
 
-import { getColorWithOpacity } from "@/lib/utils/colors";
+// import { getColorWithOpacity } from "@/lib/utils/colors";
 import {
   Bar,
   BarChart,
-  Legend,
   ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
+import ChartCustomTooltip from "./ChartCustomTooltip";
+import { type IBarChartData } from "@/types";
 
 interface DataBarChartProps {
-  data: {
-    name: string;
-    [key: string]: number | string;
-  }[];
+  data: IBarChartData[];
   height: number;
   maxBars?: number;
 }
@@ -24,9 +23,9 @@ interface DataBarChartProps {
  * of income data passed in via props.
  */
 export function DataBarChart({ data, height, maxBars = 5 }: DataBarChartProps) {
-  const maxBarSize = 60;
+  const maxBarSize = 50;
   const minBarSize = 20;
-  const maxBarGap = 40;
+  const maxBarGap = 20;
   const minBarGap = 10;
 
   const numBars = Object.keys(data[0] ?? {}).length - 1;
@@ -54,6 +53,7 @@ export function DataBarChart({ data, height, maxBars = 5 }: DataBarChartProps) {
           fontSize={12}
           tickLine={false}
           axisLine={false}
+          tickFormatter={(value: string) => `${value.toString().slice(0, 5)}`}
         />
         <YAxis
           stroke="#888888"
@@ -62,8 +62,20 @@ export function DataBarChart({ data, height, maxBars = 5 }: DataBarChartProps) {
           axisLine={false}
           tickFormatter={(value) => `$${value}`}
         />
-        <Legend className="text-primary" />
-        {data.map((entry) =>
+        <Tooltip
+          content={<ChartCustomTooltip active payload={[]} label="" />}
+          cursor={false}
+        />
+        {/* <Legend
+          formatter={(value) => (
+            <span className="flex overflow-hidden">
+              <span className=" max-w-24 truncate text-ellipsis  text-xs ">
+                {value}
+              </span>
+            </span>
+          )}
+        /> */}
+        {/* {data.map((entry) =>
           Object.keys(entry).map(
             (key, index) =>
               key !== "name" && (
@@ -75,7 +87,8 @@ export function DataBarChart({ data, height, maxBars = 5 }: DataBarChartProps) {
                 />
               ),
           ),
-        )}
+        )} */}
+        <Bar dataKey="Total" fill="#7B39ED" radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );
