@@ -15,45 +15,52 @@ import { type IBarChartData } from "@/types";
 interface DataBarChartProps {
   data: IBarChartData[];
   height: number;
-  maxBars?: number;
+  truncateLabel?: boolean;
+  // maxBars?: number;
 }
 
 /**
  * IncomesBarChart component renders a bar chart visualization
  * of income data passed in via props.
  */
-export function DataBarChart({ data, height, maxBars = 5 }: DataBarChartProps) {
-  const maxBarSize = 50;
-  const minBarSize = 20;
-  const maxBarGap = 20;
-  const minBarGap = 10;
+export function DataBarChart({
+  data,
+  height,
+  truncateLabel = true,
+}: DataBarChartProps) {
+  // const maxBarSize = 50;
+  // const minBarSize = 20;
+  // const maxBarGap = 20;
+  // const minBarGap = 10;
 
-  const numBars = Object.keys(data[0] ?? {}).length - 1;
+  // const numBars = Object.keys(data[0] ?? {}).length - 1;
 
-  const barSizeRange = maxBarSize - minBarSize;
+  // const barSizeRange = maxBarSize - minBarSize;
 
-  const barSize = Math.max(
-    minBarSize,
-    maxBarSize - (barSizeRange * (numBars - 1)) / (maxBars - 1),
-  );
+  // // const barSize = Math.max(
+  // //   minBarSize,
+  // //   maxBarSize - (barSizeRange * (numBars - 1)) / (maxBars - 1),
+  // // );
 
-  const barGapRange = maxBarGap - minBarGap;
+  // const barGapRange = maxBarGap - minBarGap;
 
-  const barGap = Math.max(
-    minBarGap,
-    maxBarGap - (barGapRange * (numBars - 1)) / (maxBars - 1),
-  );
+  // // const barGap = Math.max(
+  // //   minBarGap,
+  // //   maxBarGap - (barGapRange * (numBars - 1)) / (maxBars - 1),
+  // // );
 
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <BarChart data={data} barSize={barSize} barGap={barGap}>
+      <BarChart data={data} maxBarSize={50}>
         <XAxis
           dataKey="name"
           stroke="#888888"
           fontSize={12}
           tickLine={false}
           axisLine={false}
-          tickFormatter={(value: string) => `${value.toString().slice(0, 5)}`}
+          tickFormatter={(value: string) =>
+            truncateLabel ? `${value.toString().slice(0, 5)}` : value
+          }
         />
         <YAxis
           stroke="#888888"

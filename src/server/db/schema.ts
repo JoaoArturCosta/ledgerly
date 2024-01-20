@@ -64,6 +64,8 @@ export const incomes = mysqlTable("income", {
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
 
+export type Income = InferSelectModel<typeof incomes>;
+
 export const incomesRelations = relations(incomes, ({ one }) => ({
   incomeCategory: one(incomeCategories, {
     fields: [incomes.incomeCategoryId],

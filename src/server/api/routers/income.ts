@@ -7,6 +7,7 @@ import {
 } from "@/server/api/trpc";
 import { incomes } from "@/server/db/schema";
 import { format } from "date-fns";
+import { eq } from "drizzle-orm";
 
 export const incomeRouter = createTRPCRouter({
   getAllCategories: publicProcedure.query(({ ctx }) => {
@@ -31,7 +32,11 @@ export const incomeRouter = createTRPCRouter({
         createdById: ctx.session.user.id,
       });
 
-      return { success: true };
+      const category = await ctx.db.query.incomeCategories.findFirst({
+        where: (category) => eq(category.id, parseInt(input.incomeCategoryId)),
+      });
+
+      return { success: true, incomeCategory: category };
     }),
 
   getIncomesByMonth: protectedProcedure
@@ -138,6 +143,41 @@ export const incomeRouter = createTRPCRouter({
       );
 
       return incomesByMonth;
+    }),
+  delete: protectedProcedure
+    .input(
+      z.object({
+        id: z.number().min(1),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.delete(incomes).where(eq(incomes.id, input.id));
+
+      return { success: true };
+    }),
+  update: protectedProcedure
+    .input(
+      z.object({
+        id: z.number().min(1),
+        amount: z.number().min(1),
+        incomeCategoryId: z.string().min(1),
+        recurring: z.boolean(),
+        relatedDate: z.date(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.update(incomes).set({
+        amount: input.amount,
+        incomeCategoryId: parseInt(input.incomeCategoryId),
+        isRecurring: input.recurring,
+        relatedDate: input.relatedDate,
+      });
+
+      const category = await ctx.db.query.incomeCategories.findFirst({
+        where: (category) => eq(category.id, parseInt(input.incomeCategoryId)),
+      });
+
+      return { success: true, incomeCategory: category };
     }),
 
   // hello: publicProcedure

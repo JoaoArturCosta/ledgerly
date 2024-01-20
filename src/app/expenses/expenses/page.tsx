@@ -1,23 +1,13 @@
 import { DataBarChart } from "@/components/DataBarChart";
 import DataLineChart from "@/components/DataLineChart";
-import { DynamicFaIcon } from "@/components/DynamicFaIcon";
 import { ExpensesDialog } from "@/components/ExpensesDialog";
 import { Columns } from "@/components/ExpensesTable/Definitions/Columns";
 import { ExpensesTable } from "@/components/ExpensesTable/ExpensesTable";
 import Layout from "@/components/Layout";
 import { VIEWS_LIST } from "@/components/constants/expenses";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { api } from "@/trpc/server";
-import { IBarChartData } from "@/types";
+import { type IBarChartData } from "@/types";
 import { format } from "date-fns";
 import { Receipt } from "lucide-react";
 import { useMemo } from "react";
@@ -43,10 +33,6 @@ export default async function Expenses({ searchParams }: ExpensesProps) {
     await api.expense.getExpensesForMonth.query({
       relatedDate: new Date(relatedDate),
     });
-
-  const totalExpenses = allExpensesForCurrentMonth.reduce((acc, expense) => {
-    return acc + expense.amount;
-  }, 0);
 
   const barChartData = allExpensesForCurrentMonth.reduce(
     (acc: IBarChartData[], expense) => {
@@ -125,7 +111,7 @@ export default async function Expenses({ searchParams }: ExpensesProps) {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <DataBarChart data={barChartData} height={240} maxBars={7} />
+              <DataBarChart data={barChartData} height={240} />
             </CardContent>
           </Card>
           <Card>

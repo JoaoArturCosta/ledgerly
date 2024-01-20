@@ -49,7 +49,7 @@ const Expenses = async ({ searchParams }: ExpensesProps) => {
     return acc + income.amount;
   }, 0);
 
-  const allExpenses = await api.expense.getExpensesByMonth.query({
+  const allExpenses = await api.expense.getExpensesForMonth.query({
     relatedDate: new Date(relatedDate),
   });
 
@@ -84,11 +84,20 @@ const Expenses = async ({ searchParams }: ExpensesProps) => {
 
   const barChartData = [
     {
-      name: format(relatedDate, "MMMM yyyy").toString(),
-      Income: totalIncome.toString(),
-      Expenses: totalExpenses.toString(),
-      Savings: totalSavings.toString(),
-      Unallocated: (totalIncome - (totalExpenses + totalSavings)).toString(),
+      name: "Income",
+      Total: totalIncome,
+    },
+    {
+      name: "Expenses",
+      Total: totalExpenses,
+    },
+    {
+      name: "Savings",
+      Total: totalSavings,
+    },
+    {
+      name: "Unallocated",
+      Total: totalIncome - (totalExpenses + totalSavings),
     },
   ];
 
@@ -140,7 +149,11 @@ const Expenses = async ({ searchParams }: ExpensesProps) => {
               <CardTitle>Overview</CardTitle>
             </CardHeader>
             <CardContent>
-              <DataBarChart data={barChartData} height={400} maxBars={15} />
+              <DataBarChart
+                data={barChartData}
+                height={400}
+                truncateLabel={false}
+              />
             </CardContent>
           </Card>
         </div>

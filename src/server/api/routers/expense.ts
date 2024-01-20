@@ -40,7 +40,12 @@ export const expenseRouter = createTRPCRouter({
         createdById: ctx.session.user.id,
       });
 
-      return { success: true };
+      const subCategory = await ctx.db.query.expenseSubCategories.findFirst({
+        where: (subCategory) =>
+          eq(subCategory.id, parseInt(input.expenseSubCategoryId)),
+      });
+
+      return { success: true, expenseSubCategory: subCategory };
     }),
 
   getExpensesForMonth: protectedProcedure
@@ -170,5 +175,37 @@ export const expenseRouter = createTRPCRouter({
       await ctx.db.delete(expenses).where(eq(expenses.id, input.id));
 
       return { success: true };
+    }),
+  update: protectedProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        amount: z.number().min(1),
+        description: z.string().min(1),
+        expenseCategoryId: z.string().min(1),
+        expenseSubCategoryId: z.string().min(1),
+        recurring: z.boolean(),
+        relatedDate: z.date(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .update(expenses)
+        .set({
+          amount: input.amount,
+          description: input.description,
+          expenseCategoryId: parseInt(input.expenseCategoryId),
+          expenseSubCategoryId: parseInt(input.expenseSubCategoryId),
+          isRecurring: input.recurring,
+          relatedDate: input.relatedDate,
+        })
+        .where(eq(expenses.id, input.id));
+
+      const subCategory = await ctx.db.query.expenseSubCategories.findFirst({
+        where: (subCategory) =>
+          eq(subCategory.id, parseInt(input.expenseSubCategoryId)),
+      });
+
+      return { success: true, expenseSubCategory: subCategory };
     }),
 });
