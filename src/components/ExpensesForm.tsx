@@ -13,7 +13,7 @@ import {
 import { type UseFormReturn } from "react-hook-form";
 import SelectCategories from "./SelectCategories";
 import { api } from "@/trpc/react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   type ExpenseCategory,
   type ExpenseSubCategory,
@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { DialogClose, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import SavingsDrawer from "@/components/SavingsDrawer";
 
 interface ExpensesFormProps {
   form: UseFormReturn<TExpenseValidator>;
@@ -38,6 +39,14 @@ export default function ExpensesForm({
   onSubmit,
   buttonLabel,
 }: ExpensesFormProps) {
+  const [relatedSavingId, setRelatedSavingId] = useState<string | undefined>();
+
+  useEffect(() => {
+    if (form.getValues().expenseCategoryId === "18") {
+      form.setValue("relatedSavingId", relatedSavingId ?? "");
+    }
+  }, [relatedSavingId, form]);
+
   const { data: expenseSubCategories } =
     api.expense.getAllCategories.useQuery();
 
@@ -116,6 +125,7 @@ export default function ExpensesForm({
             )}
           />
         )}
+
         <FormField
           control={form.control}
           name="description"
@@ -149,6 +159,10 @@ export default function ExpensesForm({
             </FormItem>
           )}
         />
+
+        {watchCategory && selectedCategoryId === "18" && (
+          <SavingsDrawer setRelatedSavingId={setRelatedSavingId} />
+        )}
 
         <FormField
           control={form.control}

@@ -125,6 +125,7 @@ export const expenses = mysqlTable("expense", {
     mode: "number",
   }).notNull(),
   isRecurring: boolean("isRecurring").notNull(),
+  relatedSavingId: bigint("relatedSavingId", { mode: "number" }),
   relatedDate: timestamp("relatedDate"),
   createdById: varchar("createdById", { length: 255 }).notNull(),
   createdAt: timestamp("created_at")
@@ -145,6 +146,51 @@ export const expensesRelations = relations(expenses, ({ one }) => ({
     references: [expenseSubCategories.id],
   }),
   user: one(users, { fields: [expenses.createdById], references: [users.id] }),
+  saving: one(savings, {
+    fields: [expenses.relatedSavingId],
+    references: [savings.id],
+  }),
+}));
+
+export const savingsCategories = mysqlTable("savingsCategory", {
+  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+  name: varchar("name", { length: 256 }),
+  iconFaName: varchar("iconFaName", { length: 255 }),
+  requiresAmount: boolean("requiresAmount").notNull().default(false),
+  createdById: varchar("createdById", { length: 255 }).notNull(),
+  createdAt: timestamp("created_at")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp("updatedAt").onUpdateNow(),
+});
+
+export type SavingsCategory = InferSelectModel<typeof savingsCategories>;
+
+export const savings = mysqlTable("saving", {
+  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+  name: varchar("name", { length: 256 }),
+  startingAmount: int("startingAmount").default(0),
+  finalAmount: int("finalAmount").default(0),
+  savingsCategoryId: bigint("savingsCategoryId", {
+    mode: "number",
+  }).notNull(),
+  endDate: timestamp("endDate"),
+  createdById: varchar("createdById", { length: 255 }).notNull(),
+  createdAt: timestamp("created_at")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp("updatedAt").onUpdateNow(),
+});
+
+export type Saving = InferSelectModel<typeof savings>;
+
+export const savingsRelations = relations(savings, ({ one, many }) => ({
+  savingsCategory: one(savingsCategories, {
+    fields: [savings.savingsCategoryId],
+    references: [savingsCategories.id],
+  }),
+  user: one(users, { fields: [savings.createdById], references: [users.id] }),
+  expenses: many(expenses),
 }));
 
 export const users = mysqlTable("user", {

@@ -32,6 +32,7 @@ export default function EditExpenseDialog({ expense }: EditExpenseDialogProps) {
       expenseSubCategoryId: expense.expenseSubCategoryId.toString(),
       recurring: expense.isRecurring,
       relatedDate: expense.relatedDate!,
+      relatedSavingId: expense.relatedSavingId?.toString(),
     },
   });
 

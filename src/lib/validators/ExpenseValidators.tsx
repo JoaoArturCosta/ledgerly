@@ -7,6 +7,7 @@ export const ExpenseValidator = z.object({
   expenseSubCategoryId: z.string().min(1),
   recurring: z.boolean(),
   relatedDate: z.date(),
+  relatedSavingId: z.string().min(0),
 });
 
 export type TExpenseValidator = z.infer<typeof ExpenseValidator>;

@@ -56,7 +56,7 @@ export function ExpensesDialog() {
     onSuccess: async ({ expenseSubCategory }) => {
       setOpen(false);
       toast({
-        description: `Added ${expenseSubCategory?.name} to your income.`,
+        description: `Added ${expenseSubCategory?.name} to your expenses.`,
       });
       router.refresh();
       form.reset();
