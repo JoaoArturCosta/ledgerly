@@ -21,10 +21,12 @@ import { toast } from "@/components/ui/use-toast";
 import SavingsForm from "@/components/SavingsForm";
 
 interface CreateSavingDialogProps {
+  className?: string;
   refetchSavingsList: () => void;
 }
 
 export default function CreateSavingDialog({
+  className,
   refetchSavingsList,
 }: CreateSavingDialogProps) {
   const router = useRouter();
@@ -64,7 +66,7 @@ export default function CreateSavingDialog({
   };
   return (
     <Dialog>
-      <DialogTrigger asChild>
+      <DialogTrigger className={className} asChild>
         <Button variant="outline" className="items-left flex gap-2 ">
           Start New Saving <Plus className="h-3 w-3" />{" "}
         </Button>

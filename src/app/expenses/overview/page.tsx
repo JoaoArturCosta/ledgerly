@@ -1,3 +1,4 @@
+import CreateSavingDialog from "@/components/CreateSavingDialog";
 import { DataBarChart } from "@/components/DataBarChart";
 import { DynamicFaIcon } from "@/components/DynamicFaIcon";
 import { ExpensesDialog } from "@/components/ExpensesDialog";
@@ -41,7 +42,7 @@ const Expenses = async ({ searchParams }: ExpensesProps) => {
     return new Date(date.getFullYear(), date.getMonth(), 1);
   }, [searchParams]);
 
-  const allIncomesForCurrentMonth = await api.income.getIncomesByMonth.query({
+  const allIncomesForCurrentMonth = await api.income.getIncomesForMonth.query({
     relatedDate: new Date(relatedDate),
   });
 
@@ -49,36 +50,53 @@ const Expenses = async ({ searchParams }: ExpensesProps) => {
     return acc + income.amount;
   }, 0);
 
-  const allExpenses = await api.expense.getExpensesForMonth.query({
-    relatedDate: new Date(relatedDate),
-  });
+  const allExpensesForCurrentMonth =
+    await api.expense.getExpensesForMonth.query({
+      relatedDate: new Date(relatedDate),
+    });
 
-  const totalExpenses = allExpenses.reduce((acc, expense) => {
+  const totalExpenses = allExpensesForCurrentMonth.reduce((acc, expense) => {
     return acc + expense.amount;
   }, 0);
 
-  const totalSavings = 1000;
+  const allSavingsForCurrentMonth = await api.savings.getSavingsForMonth.query({
+    relatedDate: new Date(relatedDate),
+  });
+
+  console.log(allSavingsForCurrentMonth);
+
+  const totalSavings = Object.entries(allSavingsForCurrentMonth).reduce(
+    (acc, saving) => {
+      return acc + saving[1];
+    },
+    0,
+  );
 
   const cardsList = [
     {
       title: "Total Income",
       value: `$ ${totalIncome}`,
       icon: DollarSign,
+      description: `in ${format(relatedDate, "MMMM yyyy")}`,
       action: IncomeDialog,
     },
     {
       title: "Total Expenses",
       value: `$ ${totalExpenses}`,
       icon: Receipt,
+      description: `Expenses Rate: ${Math.round(
+        (totalExpenses / totalIncome) * 100,
+      )}%`,
       action: ExpensesDialog,
     },
     {
       title: "Total Savings",
-      value: "$ 1000",
+      value: `$ ${totalSavings}`,
       icon: PiggyBank,
       description: `Savings Rate: ${Math.round(
         (totalSavings / totalIncome) * 100,
       )}%`,
+      action: CreateSavingDialog,
     },
   ];
 
@@ -101,6 +119,11 @@ const Expenses = async ({ searchParams }: ExpensesProps) => {
     },
   ];
 
+  const refetchSavingsList = async () => {
+    "use server";
+    return;
+  };
+
   return (
     <Layout title="Income & Expenses" viewsList={VIEWS_LIST}>
       <section className="grid grid-cols-4 gap-4 pt-10">
@@ -122,7 +145,11 @@ const Expenses = async ({ searchParams }: ExpensesProps) => {
                 )}
               </CardDescription>
             </CardHeader>
-            <CardContent>{card.action && <card.action />}</CardContent>
+            <CardContent>
+              {card.action && (
+                <card.action refetchSavingsList={refetchSavingsList} />
+              )}
+            </CardContent>
           </Card>
         ))}
         <Card>
@@ -166,12 +193,12 @@ const Expenses = async ({ searchParams }: ExpensesProps) => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Category</TableHead>
+                    <TableHead>Description</TableHead>
                     <TableHead>Amount</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {allExpenses.slice(0, 10).map((expense) => (
+                  {allExpensesForCurrentMonth.slice(0, 10).map((expense) => (
                     <TableRow key={expense.id}>
                       <TableCell>
                         <span className="flex items-center gap-2">

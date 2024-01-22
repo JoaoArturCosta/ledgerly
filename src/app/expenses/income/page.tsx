@@ -28,7 +28,7 @@ export async function Income({ searchParams }: ExpensesProps) {
     return new Date(date.getFullYear(), date.getMonth(), 1);
   }, [searchParams]);
 
-  const allIncomesForCurrentMonth = await api.income.getIncomesByMonth.query({
+  const allIncomesForCurrentMonth = await api.income.getIncomesForMonth.query({
     relatedDate: new Date(relatedDate),
   });
 

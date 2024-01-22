@@ -39,7 +39,7 @@ export const incomeRouter = createTRPCRouter({
       return { success: true, incomeCategory: category };
     }),
 
-  getIncomesByMonth: protectedProcedure
+  getIncomesForMonth: protectedProcedure
     .input(
       z.object({
         relatedDate: z.date(),

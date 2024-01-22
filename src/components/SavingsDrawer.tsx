@@ -24,8 +24,6 @@ export default function SavingsDrawer({
 }: SavingsDrawerProps) {
   const { data: savings, refetch } = api.savings.getAllSavings.useQuery();
 
-  console.log(handleRelatedSavingId);
-
   const [open, setOpen] = useState(false);
 
   return (

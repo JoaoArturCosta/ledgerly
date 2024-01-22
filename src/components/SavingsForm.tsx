@@ -34,12 +34,10 @@ interface SavingFormProps {
   buttonLabel?: string;
 }
 
-export default function SavingForm({ form, onSubmit }: SavingFormProps) {
+export default function SavingsForm({ form, onSubmit }: SavingFormProps) {
   const { data: savingsCategories } = api.savings.getAllCategories.useQuery();
 
   const selectedCategoryId = form.getValues().savingsCategoryId;
-
-  console.log(form.formState);
 
   const selectedCategory = useMemo(() => {
     if (selectedCategoryId) {
@@ -182,7 +180,7 @@ export default function SavingForm({ form, onSubmit }: SavingFormProps) {
         <DialogFooter className="sm:justify-start">
           <DialogClose asChild>
             <Button type="submit" variant="default">
-              Add Income
+              Create Saving
             </Button>
           </DialogClose>
         </DialogFooter>

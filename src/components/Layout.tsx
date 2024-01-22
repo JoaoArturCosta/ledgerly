@@ -70,13 +70,15 @@ const Layout = ({ children, title, viewsList = [] }: LayoutProps) => {
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={85}>
-          <div className="h-full w-full p-10">
+          <div className="relative h-full w-full p-10">
             <div className="flex  items-end justify-between pb-6">
               <h2 className="text-3xl font-bold">{title}</h2>
               <DatePicker />
             </div>
             {!!viewsList.length && <ViewSelector viewsList={viewsList} />}
-            {children}
+            <div className="h-full max-h-[80vh] w-full overflow-y-auto">
+              {children}
+            </div>
           </div>
         </ResizablePanel>
       </ResizablePanelGroup>

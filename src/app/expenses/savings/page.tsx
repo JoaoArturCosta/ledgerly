@@ -1,27 +1,15 @@
+import CreateSavingDialog from "@/components/CreateSavingDialog";
 import { DataBarChart } from "@/components/DataBarChart";
 import DataLineChart from "@/components/DataLineChart";
-import { DynamicFaIcon } from "@/components/DynamicFaIcon";
 import { ExpensesDialog } from "@/components/ExpensesDialog";
 import Layout from "@/components/Layout";
+import SavingsCarousel from "@/components/SavingsCarousel";
 import { VIEWS_LIST } from "@/components/constants/expenses";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from "@/components/ui/carousel";
-import { Progress } from "@/components/ui/progress";
-import { cn } from "@/lib/utils";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/trpc/server";
 import { type IBarChartData } from "@/types";
 import { format } from "date-fns";
-import { PiggyBank, Receipt } from "lucide-react";
+import { Receipt } from "lucide-react";
 import React, { useMemo } from "react";
 
 interface SavingsProps {
@@ -42,6 +30,11 @@ export default async function Savings({ searchParams }: SavingsProps) {
   }, [searchParams]);
 
   const allSavings = await api.savings.getAllSavings.query();
+
+  const refetch = async () => {
+    "use server";
+    null;
+  };
 
   const savingsForCurrentMonth = await api.savings.getSavingsForMonth.query({
     relatedDate: new Date(relatedDate),
@@ -96,63 +89,11 @@ export default async function Savings({ searchParams }: SavingsProps) {
   return (
     <Layout title="Savings & Investments" viewsList={VIEWS_LIST}>
       <section className="flex w-full">
-        <Carousel className="w-full pt-6">
-          <CarouselContent>
-            {allSavings.map((saving) => (
-              <CarouselItem key={saving.id} className="basis-1/4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-end justify-between">
-                      <span className="">
-                        <DynamicFaIcon
-                          name={saving.savingsCategory.iconFaName}
-                        />{" "}
-                      </span>
-
-                      {saving.finalAmount! > 0 && (
-                        <span className="flex gap-1 text-muted-foreground">
-                          <PiggyBank className="h-4 w-4" />
-                          {`$${saving.finalAmount?.toLocaleString()}`}
-                        </span>
-                      )}
-                    </CardTitle>
-                    <CardDescription className="pt-4">
-                      <span className="font-bold text-foreground ">
-                        {saving.name}
-                      </span>{" "}
-                      &#x2022; {saving.savingsCategory.name}
-                    </CardDescription>
-                    <CardContent className="p-0">
-                      <div className="flex justify-start text-3xl font-bold">
-                        ${saving.savedAmount.toLocaleString()}
-                      </div>
-
-                      <div
-                        className={cn(
-                          "flex justify-between gap-2 ",
-                          saving.finalAmount! <= 0 && "invisible",
-                        )}
-                      >
-                        <Progress
-                          className="mt-2"
-                          value={Math.round(
-                            (saving.savedAmount / saving.finalAmount!) * 100,
-                          )}
-                        />
-                        <span className="text-muted-foreground">
-                          {Math.round(
-                            (saving.savedAmount / saving.finalAmount!) * 100,
-                          )}
-                          %
-                        </span>
-                      </div>
-                    </CardContent>
-                  </CardHeader>
-                </Card>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-        </Carousel>
+        <CreateSavingDialog
+          className="absolute left-[32%] top-[11.2%]"
+          refetchSavingsList={refetch}
+        />
+        <SavingsCarousel savings={allSavings} />
       </section>
       <section className="grid  grid-cols-8 gap-2  pt-4">
         <div className="col-span-3 grid grid-flow-row grid-rows-2 gap-2 ">
