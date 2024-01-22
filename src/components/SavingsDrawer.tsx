@@ -16,13 +16,15 @@ import { useState } from "react";
 import { toast } from "./ui/use-toast";
 
 interface SavingsDrawerProps {
-  setRelatedSavingId: (id: string) => void;
+  handleRelatedSavingId: (id: string) => void;
 }
 
 export default function SavingsDrawer({
-  setRelatedSavingId,
+  handleRelatedSavingId,
 }: SavingsDrawerProps) {
   const { data: savings, refetch } = api.savings.getAllSavings.useQuery();
+
+  console.log(handleRelatedSavingId);
 
   const [open, setOpen] = useState(false);
 
@@ -49,7 +51,7 @@ export default function SavingsDrawer({
                 className="flex items-center justify-between rounded-lg bg-primary  p-4"
                 role="presentation"
                 onClick={() => {
-                  setRelatedSavingId(saving.id.toString());
+                  handleRelatedSavingId(saving.id.toString());
                   setOpen(false);
                   toast({
                     description: `${saving.name} selected`,

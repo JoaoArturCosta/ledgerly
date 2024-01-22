@@ -27,6 +27,7 @@ export const expenseRouter = createTRPCRouter({
         expenseSubCategoryId: z.string().min(1),
         recurring: z.boolean(),
         relatedDate: z.date(),
+        relatedSavingId: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -38,6 +39,7 @@ export const expenseRouter = createTRPCRouter({
         isRecurring: input.recurring,
         relatedDate: input.relatedDate,
         createdById: ctx.session.user.id,
+        relatedSavingId: parseInt(input.relatedSavingId),
       });
 
       const subCategory = await ctx.db.query.expenseSubCategories.findFirst({
@@ -186,6 +188,7 @@ export const expenseRouter = createTRPCRouter({
         expenseSubCategoryId: z.string().min(1),
         recurring: z.boolean(),
         relatedDate: z.date(),
+        relatedSavingId: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -198,6 +201,7 @@ export const expenseRouter = createTRPCRouter({
           expenseSubCategoryId: parseInt(input.expenseSubCategoryId),
           isRecurring: input.recurring,
           relatedDate: input.relatedDate,
+          relatedSavingId: parseInt(input.relatedSavingId),
         })
         .where(eq(expenses.id, input.id));
 

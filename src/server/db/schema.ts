@@ -125,6 +125,7 @@ export const expenses = mysqlTable("expense", {
     mode: "number",
   }).notNull(),
   isRecurring: boolean("isRecurring").notNull(),
+  endDate: timestamp("endDate"),
   relatedSavingId: bigint("relatedSavingId", { mode: "number" }),
   relatedDate: timestamp("relatedDate"),
   createdById: varchar("createdById", { length: 255 }).notNull(),

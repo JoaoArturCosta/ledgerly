@@ -16,6 +16,7 @@ import ExpensesForm from "./ExpensesForm";
 import { api } from "@/trpc/react";
 import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 interface EditExpenseDialogProps {
   expense: Expense;
@@ -23,6 +24,9 @@ interface EditExpenseDialogProps {
 
 export default function EditExpenseDialog({ expense }: EditExpenseDialogProps) {
   const router = useRouter();
+
+  const [relatedSavingId, setRelatedSavingId] = useState<string>("");
+
   const form = useForm<TExpenseValidator>({
     resolver: zodResolver(ExpenseValidator),
     defaultValues: {
@@ -35,6 +39,16 @@ export default function EditExpenseDialog({ expense }: EditExpenseDialogProps) {
       relatedSavingId: expense.relatedSavingId?.toString(),
     },
   });
+
+  useEffect(() => {
+    if (form.getValues().expenseCategoryId === "18") {
+      form.setValue("relatedSavingId", relatedSavingId.toString() ?? "");
+    }
+  }, [relatedSavingId, form]);
+
+  const handleRelatedSavingId = (id: string) => {
+    setRelatedSavingId(id);
+  };
 
   const { mutate: submit } = api.expense.update.useMutation({
     onSuccess: async ({ expenseSubCategory }) => {
@@ -68,6 +82,7 @@ export default function EditExpenseDialog({ expense }: EditExpenseDialogProps) {
           form={form}
           onSubmit={onSubmit}
           buttonLabel="Save Expense"
+          handleRelatedSavingId={handleRelatedSavingId}
         />
       </DialogContent>
     </>

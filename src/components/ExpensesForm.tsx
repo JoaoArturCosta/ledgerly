@@ -13,7 +13,7 @@ import {
 import { type UseFormReturn } from "react-hook-form";
 import SelectCategories from "./SelectCategories";
 import { api } from "@/trpc/react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   type ExpenseCategory,
   type ExpenseSubCategory,
@@ -28,6 +28,7 @@ interface ExpensesFormProps {
   form: UseFormReturn<TExpenseValidator>;
   onSubmit: (data: TExpenseValidator) => void;
   buttonLabel?: string;
+  handleRelatedSavingId: (id: string) => void;
 }
 
 type ExpenseCategoryWithSubCategories = ExpenseCategory & {
@@ -38,15 +39,8 @@ export default function ExpensesForm({
   form,
   onSubmit,
   buttonLabel,
+  handleRelatedSavingId,
 }: ExpensesFormProps) {
-  const [relatedSavingId, setRelatedSavingId] = useState<string | undefined>();
-
-  useEffect(() => {
-    if (form.getValues().expenseCategoryId === "18") {
-      form.setValue("relatedSavingId", relatedSavingId ?? "");
-    }
-  }, [relatedSavingId, form]);
-
   const { data: expenseSubCategories } =
     api.expense.getAllCategories.useQuery();
 
@@ -161,7 +155,7 @@ export default function ExpensesForm({
         />
 
         {watchCategory && selectedCategoryId === "18" && (
-          <SavingsDrawer setRelatedSavingId={setRelatedSavingId} />
+          <SavingsDrawer handleRelatedSavingId={handleRelatedSavingId} />
         )}
 
         <FormField

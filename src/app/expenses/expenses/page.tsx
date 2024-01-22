@@ -55,11 +55,8 @@ export default async function Expenses({ searchParams }: ExpensesProps) {
         return acc;
       }
 
-      acc[index]!.Total += amount;
-
       return acc;
     },
-
     [] as IBarChartData[],
   );
 

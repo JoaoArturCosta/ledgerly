@@ -12,7 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 
 import { useForm } from "react-hook-form";
@@ -31,6 +31,7 @@ export function ExpensesDialog() {
   const searchParams = useSearchParams();
 
   const [, setOpen] = useState(false);
+  const [relatedSavingId, setRelatedSavingId] = useState<string>("");
 
   const relatedDate = useMemo(() => {
     if (searchParams.get("month")) {
@@ -49,8 +50,19 @@ export function ExpensesDialog() {
       expenseSubCategoryId: "",
       recurring: false,
       relatedDate: relatedDate,
+      relatedSavingId: relatedSavingId,
     },
   });
+
+  const handleRelatedSavingId = (id: string) => {
+    setRelatedSavingId(id);
+  };
+
+  useEffect(() => {
+    if (form.getValues().expenseCategoryId === "18") {
+      form.setValue("relatedSavingId", relatedSavingId ?? "");
+    }
+  }, [relatedSavingId, form]);
 
   const { mutate: submit } = api.expense.create.useMutation({
     onSuccess: async ({ expenseSubCategory }) => {
@@ -89,7 +101,11 @@ export function ExpensesDialog() {
             Any Expense that you make will be added to your total expense.
           </DialogDescription>
         </DialogHeader>
-        <ExpensesForm form={form} onSubmit={onSubmit} />
+        <ExpensesForm
+          form={form}
+          onSubmit={onSubmit}
+          handleRelatedSavingId={handleRelatedSavingId}
+        />
       </DialogContent>
     </Dialog>
   );
