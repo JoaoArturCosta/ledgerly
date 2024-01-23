@@ -23,12 +23,18 @@ import { Switch } from "@/components/ui/switch";
 import { DialogClose, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import SavingsDrawer from "@/components/SavingsDrawer";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { Calendar } from "./ui/calendar";
+import { cn } from "@/lib/utils";
 
 interface ExpensesFormProps {
   form: UseFormReturn<TExpenseValidator>;
   onSubmit: (data: TExpenseValidator) => void;
   buttonLabel?: string;
   handleRelatedSavingId: (id: string) => void;
+  hasRelatedSaving?: boolean;
 }
 
 type ExpenseCategoryWithSubCategories = ExpenseCategory & {
@@ -40,6 +46,7 @@ export default function ExpensesForm({
   onSubmit,
   buttonLabel,
   handleRelatedSavingId,
+  hasRelatedSaving,
 }: ExpensesFormProps) {
   const { data: expenseSubCategories } =
     api.expense.getAllCategories.useQuery();
@@ -75,6 +82,7 @@ export default function ExpensesForm({
   );
 
   const watchCategory = form.watch("expenseCategoryId");
+  const watchIsRecurring = form.watch("recurring");
 
   return (
     <Form {...form}>
@@ -154,7 +162,7 @@ export default function ExpensesForm({
           )}
         />
 
-        {watchCategory && selectedCategoryId === "18" && (
+        {watchCategory && selectedCategoryId === "18" && !hasRelatedSaving && (
           <SavingsDrawer handleRelatedSavingId={handleRelatedSavingId} />
         )}
 
@@ -179,6 +187,59 @@ export default function ExpensesForm({
             </FormItem>
           )}
         />
+
+        {watchIsRecurring && (
+          <FormField
+            control={form.control}
+            name="endDate"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormControl>
+                  <FormItem className="flex flex-col">
+                    <FormLabel>End Date</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-[240px] pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground",
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "PPP")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) =>
+                            date < new Date() || date < new Date("1900-01-01")
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormDescription>
+                      The date you want to reach your goal.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
         <DialogFooter className="sm:justify-start">
           <DialogClose asChild>
             <Button type="submit" variant="default">

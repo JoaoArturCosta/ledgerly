@@ -2,6 +2,7 @@ import { type inferRouterInputs, type inferRouterOutputs } from "@trpc/server";
 import superjson from "superjson";
 
 import { type AppRouter } from "@/server/api/root";
+import { type ArrayElement } from "@/types";
 
 export const transformer = superjson;
 
@@ -28,3 +29,7 @@ export type RouterInputs = inferRouterInputs<AppRouter>;
  * @example type HelloOutput = RouterOutputs['example']['hello']
  */
 export type RouterOutputs = inferRouterOutputs<AppRouter>;
+
+export type TSavingsOutput = RouterOutputs["savings"]["getAllSavings"];
+
+export type TSavingOutput = ArrayElement<TSavingsOutput>;

@@ -14,3 +14,6 @@ export interface IBarChartData {
   // [key: string]: number | string;
   Total: number;
 }
+
+export type ArrayElement<ArrayType extends readonly unknown[]> =
+  ArrayType extends readonly (infer ElementType)[] ? ElementType : never;

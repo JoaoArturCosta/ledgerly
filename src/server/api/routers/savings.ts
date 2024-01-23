@@ -1,8 +1,8 @@
-import { savings } from "@/server/db/schema";
+import { savings, savingsWithdrawals } from "@/server/db/schema";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
-import { eq } from "drizzle-orm";
-import { format } from "date-fns";
+import { and, eq } from "drizzle-orm";
+import { format, startOfMonth, subMonths } from "date-fns";
 
 export const savingsRouter = createTRPCRouter({
   getAllCategories: publicProcedure.query(({ ctx }) => {
@@ -13,6 +13,8 @@ export const savingsRouter = createTRPCRouter({
       where: (savings, { eq }) => eq(savings.createdById, ctx.session.user.id),
       with: {
         savingsCategory: true,
+        savingWithdrawals: true,
+        expenses: true,
       },
     });
 
@@ -33,7 +35,7 @@ export const savingsRouter = createTRPCRouter({
 
           return {
             ...saving,
-            savedAmount: totalSaved,
+            savedAmount: totalSaved - (saving.withdrawnAmount ?? 0),
           };
         }),
       ),
@@ -44,67 +46,77 @@ export const savingsRouter = createTRPCRouter({
   getAllSavingsByMonth: protectedProcedure.query(async ({ ctx }) => {
     const currentDate = new Date();
 
-    const savings = await ctx.db.query.expenses.findMany({
-      where: (expenses, { and, eq, or, notBetween }) =>
+    const savings = await ctx.db.query.savings.findMany({
+      where: (saving, { and, eq, notBetween, or }) =>
         or(
           and(
-            eq(expenses.createdById, ctx.session.user.id),
-            eq(expenses.expenseCategoryId, 18),
-          ),
-          and(
-            eq(expenses.isRecurring, true),
-            eq(expenses.expenseCategoryId, 18),
+            eq(saving.createdById, ctx.session.user.id),
             notBetween(
-              expenses.endDate,
+              saving.endDate,
               new Date(1900, 1, 1),
               new Date(currentDate.getFullYear(), currentDate.getMonth(), 31),
             ),
           ),
+          and(eq(saving.createdById, ctx.session.user.id)),
         ),
       with: {
-        saving: true,
+        expenses: true,
+        savingWithdrawals: true,
       },
     });
 
-    const expensesByMonth = savings.reduce(
-      (acc, expense) => {
-        const month = format(expense.relatedDate!, "MMMM");
-        const year = expense.relatedDate!.getFullYear();
-        const amount = expense.amount;
+    const savingsByMonth = savings.reduce(
+      (acc, saving) => {
+        for (let i = 5; i >= 0; i--) {
+          const date = subMonths(startOfMonth(currentDate), i);
+          date.setDate(currentDate.getDate() + 1);
+          const month = format(date, "MMMM yyyy");
 
-        if (expense.isRecurring) {
-          for (let i = 0; i < 12; i++) {
-            const date = new Date(year, i, 1);
-            const month = format(date, "MMMM");
-            if (!acc[month]) {
-              acc[month] = {
-                [expense.saving!.name!]: amount,
-                Total: amount,
-              };
-            } else if (acc[month]) {
-              if (!acc[month]![expense.saving!.name!]) {
-                acc[month]![expense.saving!.name!] = amount;
-              }
-              acc[month]!.Total += amount;
+          if (
+            Date.parse(saving.createdAt.toString()) >
+            Date.parse(date.toString())
+          ) {
+            continue;
+          }
+
+          const depositsForMonth = saving.expenses
+            .filter(
+              (expense) =>
+                expense.relatedDate?.getMonth() === i &&
+                expense.relatedDate?.getFullYear() ===
+                  currentDate.getFullYear(),
+            )
+            .reduce((total, expense) => {
+              return total + expense.amount;
+            }, 0);
+
+          const withdrawalsForMonth = saving.savingWithdrawals
+            .filter(
+              (withdrawal) =>
+                withdrawal.createdAt?.getMonth() === i &&
+                withdrawal.createdAt?.getFullYear() ===
+                  currentDate.getFullYear(),
+            )
+            .reduce((total, withdrawal) => {
+              return total + withdrawal.amount;
+            }, 0);
+
+          if (!acc[month]) {
+            acc[month] = {
+              [saving.name!]:
+                saving.startingAmount! + depositsForMonth - withdrawalsForMonth,
+              Total:
+                saving.startingAmount! + depositsForMonth - withdrawalsForMonth,
+            };
+          } else if (acc[month]) {
+            if (!acc[month]![saving.name!]) {
+              acc[month]![saving.name!] =
+                saving.startingAmount! + depositsForMonth - withdrawalsForMonth;
             }
-          }
-          return acc;
-        }
 
-        if (!acc[month]) {
-          acc[month] = {
-            [expense.saving!.name!]: amount,
-            Total: amount,
-          };
-        }
-
-        if (acc[month]) {
-          if (!acc[month]![expense.saving!.name!]) {
-            acc[month]![expense.saving!.name!] = amount;
-          } else {
-            acc[month]![expense.saving!.name!] += amount;
+            acc[month]!.Total +=
+              saving.startingAmount! + depositsForMonth - withdrawalsForMonth;
           }
-          acc[month]!.Total += amount;
         }
 
         return acc;
@@ -112,26 +124,7 @@ export const savingsRouter = createTRPCRouter({
       {} as Record<string, { Total: number; [key: string]: number }>,
     );
 
-    return expensesByMonth;
-
-    // const savingsCategory = await ctx.db.query.savingsCategories.findMany();
-
-    // const savingsByCategory = savings.reduce(
-    //   (acc, expense) => {
-    //     const savingsCategoryName = savingsCategory.find(
-    //       (category) => category.id === expense.saving?.savingsCategoryId,
-    //     )?.name;
-
-    //     if (!acc[savingsCategoryName!]) {
-    //       acc[savingsCategoryName!] = 0;
-    //     }
-    //     acc[savingsCategoryName!] += expense.amount;
-    //     return acc;
-    //   },
-    //   {} as Record<string, { Total: number; [key: string]: number }>,
-    // );
-
-    // return savingsByCategory;
+    return savingsByMonth;
   }),
 
   create: protectedProcedure
@@ -145,7 +138,6 @@ export const savingsRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      console.log(input);
       await ctx.db.insert(savings).values({
         name: input.name,
         finalAmount: input.finalAmount,
@@ -211,5 +203,39 @@ export const savingsRouter = createTRPCRouter({
       );
 
       return savingsByCategory;
+    }),
+
+  createSavingWithdrawal: protectedProcedure
+    .input(
+      z.object({
+        amount: z.number().min(1),
+        description: z.string().min(0),
+        savingId: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.insert(savingsWithdrawals).values({
+        amount: input.amount,
+        description: input.description,
+        savingId: parseInt(input.savingId),
+        createdById: ctx.session.user.id,
+      });
+
+      const relatedSaving = await ctx.db.query.savings.findFirst({
+        where: (saving, { and, eq }) =>
+          and(
+            eq(saving.createdById, ctx.session.user.id),
+            eq(saving.id, parseInt(input.savingId)),
+          ),
+      });
+
+      await ctx.db
+        .update(savings)
+        .set({
+          withdrawnAmount: (relatedSaving?.withdrawnAmount ?? 0) + input.amount,
+        })
+        .where(and(eq(savings.id, parseInt(input.savingId))));
+
+      return { success: true, savingWithdrawal: input };
     }),
 });

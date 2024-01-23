@@ -34,7 +34,11 @@ interface SavingFormProps {
   buttonLabel?: string;
 }
 
-export default function SavingsForm({ form, onSubmit }: SavingFormProps) {
+export default function SavingsForm({
+  form,
+  onSubmit,
+  buttonLabel,
+}: SavingFormProps) {
   const { data: savingsCategories } = api.savings.getAllCategories.useQuery();
 
   const selectedCategoryId = form.getValues().savingsCategoryId;
@@ -180,7 +184,7 @@ export default function SavingsForm({ form, onSubmit }: SavingFormProps) {
         <DialogFooter className="sm:justify-start">
           <DialogClose asChild>
             <Button type="submit" variant="default">
-              Create Saving
+              {buttonLabel ?? `Create Saving`}
             </Button>
           </DialogClose>
         </DialogFooter>

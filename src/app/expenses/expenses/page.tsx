@@ -1,8 +1,8 @@
 import { DataBarChart } from "@/components/DataBarChart";
 import DataLineChart from "@/components/DataLineChart";
 import { ExpensesDialog } from "@/components/ExpensesDialog";
-import { Columns } from "@/components/ExpensesTable/Definitions/Columns";
-import { ExpensesTable } from "@/components/ExpensesTable/ExpensesTable";
+import { Columns } from "@/components/DataTable/Definitions/ExpensesColumns";
+import { ExpensesTable } from "@/components/DataTable/ExpensesTable";
 import Layout from "@/components/Layout";
 import { VIEWS_LIST } from "@/components/constants/expenses";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

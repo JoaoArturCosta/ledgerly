@@ -10,7 +10,11 @@ import {
   getSortedRowModel,
   type ColumnFiltersState,
   getFilteredRowModel,
+  type FilterFn,
+  type FilterFns,
 } from "@tanstack/react-table";
+
+import { type RankingInfo, rankItem } from "@tanstack/match-sorter-utils";
 
 import {
   Table,
@@ -24,6 +28,31 @@ import { DataTablePagination } from "./DataTablePagination";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 
+declare module "@tanstack/table-core" {
+  interface FilterFns {
+    fuzzy: FilterFn<unknown>;
+  }
+  interface FilterMeta {
+    itemRank: RankingInfo;
+  }
+}
+
+const fuzzyFilter: FilterFn<unknown> = (row, columnId, value, addMeta) => {
+  // Rank the item
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+  const itemRank = rankItem(row.getValue(columnId), value);
+
+  // Store the itemRank info
+  addMeta({
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    itemRank,
+  });
+
+  // Return if the item should be filtered in/out
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
+  return itemRank.passed;
+};
+
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
@@ -35,18 +64,25 @@ export function ExpensesTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [globalFilter, setGlobalFilter] = useState("");
+
   const table = useReactTable({
     data,
     columns,
+    filterFns: {
+      fuzzy: fuzzyFilter,
+    } as FilterFns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
+    onGlobalFilterChange: setGlobalFilter,
     getFilteredRowModel: getFilteredRowModel(),
     state: {
       sorting,
       columnFilters,
+      globalFilter,
     },
   });
 
@@ -54,17 +90,9 @@ export function ExpensesTable<TData, TValue>({
     <div>
       <div className="flex items-center py-4">
         <Input
-          placeholder="Filter Categories..."
-          value={
-            (table
-              .getColumn("expenseCategory_name")
-              ?.getFilterValue() as string) ?? ""
-          }
-          onChange={(event) =>
-            table
-              .getColumn("expenseCategory_name")
-              ?.setFilterValue(event.target.value)
-          }
+          placeholder="Filter Columns..."
+          value={globalFilter ?? ""}
+          onChange={(event) => setGlobalFilter(String(event.target.value))}
           className="max-w-sm"
         />
       </div>

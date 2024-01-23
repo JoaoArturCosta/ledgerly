@@ -25,13 +25,25 @@ import {
 } from "@/lib/validators/ExpenseValidators";
 import ExpensesForm from "@/components/ExpensesForm";
 
-export function ExpensesDialog() {
+interface ExpensesDialogProps {
+  className?: string;
+  triggerLabel?: string;
+  savingId?: string;
+}
+
+export function ExpensesDialog({
+  className,
+  triggerLabel,
+  savingId,
+}: ExpensesDialogProps) {
   const { toast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const [, setOpen] = useState(false);
-  const [relatedSavingId, setRelatedSavingId] = useState<string>("");
+  const [relatedSavingId, setRelatedSavingId] = useState<string>(
+    savingId ?? "",
+  );
 
   const relatedDate = useMemo(() => {
     if (searchParams.get("month")) {
@@ -46,7 +58,7 @@ export function ExpensesDialog() {
     defaultValues: {
       amount: 0,
       description: "",
-      expenseCategoryId: "",
+      expenseCategoryId: relatedSavingId ? "18" : "",
       expenseSubCategoryId: "",
       recurring: false,
       relatedDate: relatedDate,
@@ -89,9 +101,9 @@ export function ExpensesDialog() {
 
   return (
     <Dialog>
-      <DialogTrigger asChild>
+      <DialogTrigger className={className} asChild>
         <Button variant="outline" className="items-left flex gap-2 ">
-          Add Expense <Plus className="h-3 w-3" />{" "}
+          {triggerLabel ?? `Add Expense`} <Plus className="h-3 w-3" />{" "}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
@@ -105,6 +117,7 @@ export function ExpensesDialog() {
           form={form}
           onSubmit={onSubmit}
           handleRelatedSavingId={handleRelatedSavingId}
+          hasRelatedSaving={!!savingId}
         />
       </DialogContent>
     </Dialog>

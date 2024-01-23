@@ -5,7 +5,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
-import { expenses } from "@/server/db/schema";
+import { expenses, savings } from "@/server/db/schema";
 import { format } from "date-fns";
 import { eq } from "drizzle-orm";
 
@@ -41,6 +41,19 @@ export const expenseRouter = createTRPCRouter({
         createdById: ctx.session.user.id,
         relatedSavingId: parseInt(input.relatedSavingId),
       });
+
+      if (!!input.relatedSavingId) {
+        const relatedSaving = await ctx.db.query.savings.findFirst({
+          where: (saving) => eq(saving.id, parseInt(input.relatedSavingId)),
+        });
+
+        await ctx.db
+          .update(savings)
+          .set({
+            depositedAmount: relatedSaving!.depositedAmount! + input.amount,
+          })
+          .where(eq(savings.id, parseInt(input.relatedSavingId)));
+      }
 
       const subCategory = await ctx.db.query.expenseSubCategories.findFirst({
         where: (subCategory) =>
