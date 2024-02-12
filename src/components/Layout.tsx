@@ -18,10 +18,16 @@ import ViewSelector from "./ViewSelector";
 interface LayoutProps {
   children: React.ReactNode;
   title: string;
-  viewsList: { value: string; label: string }[];
+  viewsList?: { value: string; label: string }[];
+  noDatePicker?: boolean;
 }
 
-const Layout = ({ children, title, viewsList = [] }: LayoutProps) => {
+const Layout = ({
+  children,
+  title,
+  viewsList = [],
+  noDatePicker,
+}: LayoutProps) => {
   const { data: sessionData } = useSession();
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false as const);
 
@@ -73,10 +79,10 @@ const Layout = ({ children, title, viewsList = [] }: LayoutProps) => {
           <div className="relative h-full w-full p-10">
             <div className="flex  items-end justify-between pb-6">
               <h2 className="text-3xl font-bold">{title}</h2>
-              <DatePicker />
+              {!noDatePicker && <DatePicker />}
             </div>
             {!!viewsList.length && <ViewSelector viewsList={viewsList} />}
-            <div className="h-full max-h-[80vh] w-full overflow-y-auto">
+            <div className="h-full max-h-[81vh] w-full overflow-y-auto">
               {children}
             </div>
           </div>

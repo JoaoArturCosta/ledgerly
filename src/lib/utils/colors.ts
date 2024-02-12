@@ -4,8 +4,9 @@ export const getColorWithOpacity = (
   numBars: number,
 ): string => {
   // Calculate opacity value
-  const opacityDiff = 0.8 / numBars;
-  const opacity = 1 - index * opacityDiff;
+  const opacityDiff = 1 / numBars;
+  const invertedIndex = numBars - index - 1;
+  const opacity = 1 - invertedIndex * opacityDiff;
 
   // Build RGBA color string
   const r = parseInt(colorHex.slice(1, 3), 16);

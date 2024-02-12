@@ -1,4 +1,12 @@
-import { ArrowUpDown, Layers, LayoutDashboard } from "lucide-react";
+import {
+  ArrowUpDown,
+  Banknote,
+  GanttChart,
+  Layers,
+  LayoutDashboard,
+  PiggyBank,
+  Receipt,
+} from "lucide-react";
 import { type NavItem } from "@/types";
 
 export const NavItems: NavItem[] = [
@@ -11,6 +19,28 @@ export const NavItems: NavItem[] = [
     title: "Income & Expenses",
     icon: ArrowUpDown,
     href: "/expenses/overview",
+    children: [
+      {
+        title: "Overview",
+        icon: GanttChart,
+        href: "/expenses/overview",
+      },
+      {
+        title: "Income",
+        icon: Banknote,
+        href: "/expenses/income",
+      },
+      {
+        title: "Expenses",
+        icon: Receipt,
+        href: "/expenses/expenses",
+      },
+      {
+        title: "Savings",
+        icon: PiggyBank,
+        href: "/expenses/savings",
+      },
+    ],
   },
   {
     title: "Assets & Goals",

@@ -27,6 +27,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface SavingFormProps {
   form: UseFormReturn<TSavingsValidator>;
@@ -39,7 +40,8 @@ export default function SavingsForm({
   onSubmit,
   buttonLabel,
 }: SavingFormProps) {
-  const { data: savingsCategories } = api.savings.getAllCategories.useQuery();
+  const { data: savingsCategories, isLoading } =
+    api.savings.getAllCategories.useQuery();
 
   const selectedCategoryId = form.getValues().savingsCategoryId;
 
@@ -53,6 +55,28 @@ export default function SavingsForm({
   }, [selectedCategoryId, savingsCategories]);
 
   const watchCategory = form.watch("savingsCategoryId");
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-3">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-[100px]" />
+          <Skeleton className="h-4 w-[250px]" />
+        </div>
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-[100px]" />
+          <Skeleton className="h-4 w-[250px]" />
+        </div>
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-[100px]" />
+          <Skeleton className="h-4 w-[250px]" />
+        </div>
+        <Button type="submit" variant="default" disabled>
+          {buttonLabel ?? `Create Saving`}
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <Form {...form}>

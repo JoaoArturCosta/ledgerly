@@ -12,12 +12,20 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 export function DatePicker() {
   const router = useRouter();
   const pathname = usePathname();
-  const [month, setMonth] = useState<Date>(addMonths(new Date(), 0));
+  const searchParams = useSearchParams();
+
+  const [month, setMonth] = useState<Date>(
+    new Date(
+      searchParams.has("month")
+        ? searchParams.get("month")!
+        : addMonths(new Date(), 0),
+    ),
+  );
 
   const handleMonthChange = (month: Date) => {
     router.push(`${pathname}?month=${format(month, "MMMM/yyyy")}`);

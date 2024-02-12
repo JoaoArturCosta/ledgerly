@@ -17,6 +17,7 @@ import { SavingsWithdrawalDialog } from "@/components/SavingsWithdrawalDialog";
 import { ExpensesTable } from "./DataTable/ExpensesTable";
 import { SavingsColumns } from "@/components/DataTable/Definitions/SavingsColumns";
 import { type TSavingOutput } from "@/trpc/shared";
+import DeleteSavingButton from "@/components/DeleteSavingButton";
 
 interface SavingsCarouselItemProps {
   saving: TSavingOutput;
@@ -84,7 +85,7 @@ export default function SavingsCarouselItem({
           </Card>
         </DialogTrigger>
         <DialogContent>
-          <div className="flex flex-col gap-2 p-4">
+          <div className="flex flex-col gap-2 pt-3">
             <div className="flex flex-col">
               <div className="m flex items-center justify-between gap-2">
                 <span className="font-bold">{saving.name}</span>
@@ -100,13 +101,14 @@ export default function SavingsCarouselItem({
                 Current Balance
               </span>
             </div>
-            <div className="flex justify-start gap-6 pt-4">
+            <div className="flex justify-evenly pt-4">
               <ExpensesDialog
                 triggerLabel="Add Money"
                 savingId={saving.id.toString()}
               />
               <SavingsWithdrawalDialog relatedSaving={saving} />
               <EditSavingDialog saving={saving} />
+              <DeleteSavingButton relatedSaving={saving} />
             </div>
             <ExpensesTable columns={SavingsColumns} data={transactions} />
           </div>

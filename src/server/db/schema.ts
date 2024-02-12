@@ -185,6 +185,7 @@ export const savings = mysqlTable("saving", {
   savingsCategoryId: bigint("savingsCategoryId", {
     mode: "number",
   }).notNull(),
+  enabled: boolean("enabled").notNull().default(true),
   depositedAmount: int("depositedAmount").default(0),
   withdrawnAmount: int("withdrawnAmount").default(0),
   endDate: timestamp("endDate"),

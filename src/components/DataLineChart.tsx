@@ -17,9 +17,16 @@ interface DataLineChartProps {
     [key: string]: number | string;
   }[];
   height: number;
+  noXAxis?: boolean;
+  noYAxis?: boolean;
 }
 
-export default function DataLineChart({ data, height }: DataLineChartProps) {
+export default function DataLineChart({
+  data,
+  height,
+  noXAxis,
+  noYAxis,
+}: DataLineChartProps) {
   const numLines = Object.keys(data[0] ?? {}).length - 1;
 
   return (
@@ -31,16 +38,18 @@ export default function DataLineChart({ data, height }: DataLineChartProps) {
           fontSize={12}
           tickLine={false}
           axisLine={false}
-          tickFormatter={(value: string) => value.slice(0, 3)}
+          tickFormatter={(value: string) => (noXAxis ? "" : value.slice(0, 3))}
           minTickGap={1}
         />
-        <YAxis
-          stroke="#888888"
-          fontSize={12}
-          tickLine={false}
-          axisLine={false}
-          tickFormatter={(value) => `$ ${value}`}
-        />
+        {!noYAxis && (
+          <YAxis
+            stroke="#888888"
+            fontSize={12}
+            tickLine={false}
+            axisLine={false}
+            tickFormatter={(value) => (noYAxis ? "" : `$ ${value}`)}
+          />
+        )}
         <Tooltip
           content={<ChartCustomTooltip active payload={[]} label="" />}
         />

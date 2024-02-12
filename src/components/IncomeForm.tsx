@@ -18,6 +18,7 @@ import { DialogClose, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { api } from "@/trpc/react";
 import { type IncomeCategory } from "@/server/db/schema";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface IncomeFormProps {
   form: UseFormReturn<TIncomeValidator>;
@@ -26,7 +27,29 @@ interface IncomeFormProps {
 }
 
 export default function IncomeForm({ form, onSubmit }: IncomeFormProps) {
-  const { data: incomeCategories } = api.income.getAllCategories.useQuery();
+  const { data: incomeCategories, isLoading } =
+    api.income.getAllCategories.useQuery();
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-3">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-[100px]" />
+          <Skeleton className="h-4 w-[250px]" />
+        </div>
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-[100px]" />
+          <Skeleton className="h-4 w-[250px]" />
+        </div>
+        <div className="space-y-2">
+          <Skeleton className="h-12 w-[250px]" />
+        </div>
+        <Button type="submit" variant="default" disabled>
+          Add Income
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <Form {...form}>
@@ -96,7 +119,7 @@ export default function IncomeForm({ form, onSubmit }: IncomeFormProps) {
         <DialogFooter className="sm:justify-start">
           <DialogClose asChild>
             <Button type="submit" variant="default">
-              Add Income
+              Update Income
             </Button>
           </DialogClose>
         </DialogFooter>

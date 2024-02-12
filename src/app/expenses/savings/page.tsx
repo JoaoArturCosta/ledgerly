@@ -90,7 +90,7 @@ export default async function Savings({ searchParams }: SavingsProps) {
     <Layout title="Savings & Investments" viewsList={VIEWS_LIST}>
       <section className="flex w-full">
         <CreateSavingDialog
-          className="absolute left-[32%] top-[11.2%]"
+          className="absolute left-[400px] top-[100px]"
           refetchSavingsList={refetch}
         />
         <SavingsCarousel savings={allSavings} />
@@ -136,10 +136,6 @@ export default async function Savings({ searchParams }: SavingsProps) {
               data={savingsForCurrentMonthBarChartData}
               height={380}
             />
-            {/* <ExpensesTable
-              columns={Columns}
-              data={allExpensesForCurrentMonth}
-            /> */}
           </CardContent>
         </Card>
       </section>

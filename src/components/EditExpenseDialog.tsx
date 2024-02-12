@@ -27,6 +27,8 @@ export default function EditExpenseDialog({ expense }: EditExpenseDialogProps) {
 
   const [relatedSavingId, setRelatedSavingId] = useState<string>("");
 
+  const endDate = expense.endDate ?? undefined;
+
   const form = useForm<TExpenseValidator>({
     resolver: zodResolver(ExpenseValidator),
     defaultValues: {
@@ -37,6 +39,7 @@ export default function EditExpenseDialog({ expense }: EditExpenseDialogProps) {
       recurring: expense.isRecurring,
       relatedDate: expense.relatedDate!,
       relatedSavingId: expense.relatedSavingId?.toString(),
+      endDate: endDate,
     },
   });
 
@@ -56,6 +59,7 @@ export default function EditExpenseDialog({ expense }: EditExpenseDialogProps) {
         description: `Updated ${expenseSubCategory?.name} in your expenses.`,
       });
       router.refresh();
+      // setDialogOpen(false);
     },
     onError: () => {
       toast({
@@ -65,6 +69,7 @@ export default function EditExpenseDialog({ expense }: EditExpenseDialogProps) {
   });
 
   const onSubmit = async (data: TExpenseValidator) => {
+    console.log(data);
     submit({
       id: expense.id,
       ...data,

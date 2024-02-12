@@ -20,14 +20,15 @@ import {
 } from "@/server/db/schema";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { DialogClose, DialogFooter } from "@/components/ui/dialog";
+import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import SavingsDrawer from "@/components/SavingsDrawer";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Trash2 } from "lucide-react";
 import { Calendar } from "./ui/calendar";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ExpensesFormProps {
   form: UseFormReturn<TExpenseValidator>;
@@ -48,7 +49,7 @@ export default function ExpensesForm({
   handleRelatedSavingId,
   hasRelatedSaving,
 }: ExpensesFormProps) {
-  const { data: expenseSubCategories } =
+  const { data: expenseSubCategories, isLoading } =
     api.expense.getAllCategories.useQuery();
 
   const expenseCategoriesList = expenseSubCategories?.reduce(
@@ -83,6 +84,31 @@ export default function ExpensesForm({
 
   const watchCategory = form.watch("expenseCategoryId");
   const watchIsRecurring = form.watch("recurring");
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-3">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-[100px]" />
+          <Skeleton className="h-4 w-[250px]" />
+        </div>
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-[100px]" />
+          <Skeleton className="h-4 w-[250px]" />
+        </div>
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-[100px]" />
+          <Skeleton className="h-4 w-[250px]" />
+        </div>
+        <div className="space-y-2">
+          <Skeleton className="h-12 w-[250px]" />
+        </div>
+        <Button type="submit" variant="default" disabled>
+          {buttonLabel ?? `Add Expense`}
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <Form {...form}>
@@ -174,7 +200,8 @@ export default function ExpensesForm({
               <div className="space-y-0.5">
                 <FormLabel>Recurring Expense</FormLabel>
                 <FormDescription>
-                  This expense will happen every month, like rent or membership.
+                  This expense will happen every month, like rent or a
+                  membership.
                 </FormDescription>
               </div>
               <FormControl>
@@ -197,39 +224,49 @@ export default function ExpensesForm({
                 <FormControl>
                   <FormItem className="flex flex-col">
                     <FormLabel>End Date</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "w-[240px] pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground",
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "PPP")
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={(date) =>
-                            date < new Date() || date < new Date("1900-01-01")
-                          }
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <div className="flex items-center gap-1">
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-[240px] pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground",
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) =>
+                              date < new Date() || date < new Date("1900-01-01")
+                            }
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => field.onChange(undefined)}
+                        disabled={!field.value}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                     <FormDescription>
-                      The date you want to reach your goal.
+                      The date you expect this expense to end.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -241,11 +278,11 @@ export default function ExpensesForm({
         )}
 
         <DialogFooter className="sm:justify-start">
-          <DialogClose asChild>
-            <Button type="submit" variant="default">
-              {buttonLabel ?? `Add Expense`}
-            </Button>
-          </DialogClose>
+          {/* <DialogClose asChild> */}
+          <Button type="submit" variant="default">
+            {buttonLabel ?? `Add Expense`}
+          </Button>
+          {/* </DialogClose> */}
         </DialogFooter>
       </form>
     </Form>

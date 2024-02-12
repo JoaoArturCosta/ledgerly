@@ -42,7 +42,7 @@ export default function SavingsDrawer({
           <div className="flex items-center gap-6 px-4">
             <CreateSavingDialog refetchSavingsList={refetch} />
           </div>
-          <div className="flex flex-col gap-2 p-4">
+          <div className="flex flex-col gap-2">
             {savings?.map((saving) => (
               <div
                 key={saving.id}

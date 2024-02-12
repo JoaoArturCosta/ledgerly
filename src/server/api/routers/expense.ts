@@ -28,6 +28,7 @@ export const expenseRouter = createTRPCRouter({
         recurring: z.boolean(),
         relatedDate: z.date(),
         relatedSavingId: z.string(),
+        endDate: z.date().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -40,6 +41,7 @@ export const expenseRouter = createTRPCRouter({
         relatedDate: input.relatedDate,
         createdById: ctx.session.user.id,
         relatedSavingId: parseInt(input.relatedSavingId),
+        endDate: input.endDate,
       });
 
       if (!!input.relatedSavingId) {
@@ -47,10 +49,26 @@ export const expenseRouter = createTRPCRouter({
           where: (saving) => eq(saving.id, parseInt(input.relatedSavingId)),
         });
 
+        let depositAmount = input.amount;
+
+        if (input.recurring) {
+          const currentMonth = new Date().getMonth();
+
+          let endMonth = 12;
+
+          if (input.endDate) {
+            endMonth = input.endDate.getMonth();
+          }
+
+          const months = endMonth - currentMonth;
+
+          depositAmount = input.amount * months;
+        }
+
         await ctx.db
           .update(savings)
           .set({
-            depositedAmount: relatedSaving!.depositedAmount! + input.amount,
+            depositedAmount: relatedSaving!.depositedAmount! + depositAmount,
           })
           .where(eq(savings.id, parseInt(input.relatedSavingId)));
       }
@@ -179,6 +197,82 @@ export const expenseRouter = createTRPCRouter({
 
       return expensesByMonth;
     }),
+  getExpensesForYearByCategory: protectedProcedure
+    .input(
+      z.object({
+        relatedDate: z.date(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const year = input.relatedDate.getFullYear();
+
+      const expenses = await ctx.db.query.expenses.findMany({
+        where: (expenses, { and, eq, or, between }) =>
+          or(
+            and(
+              eq(expenses.createdById, ctx.session.user.id),
+              between(
+                expenses.relatedDate,
+                new Date(year, 0, 1),
+                new Date(year, 11, 31),
+              ),
+              eq(expenses.isRecurring, false),
+            ),
+            eq(expenses.isRecurring, true),
+          ),
+        with: {
+          expenseCategory: true,
+          expenseSubCategory: true,
+        },
+      });
+
+      const expensesByCategory = expenses.reduce(
+        (acc, expense) => {
+          const month = format(expense.relatedDate!, "MMMM");
+          const amount = expense.amount;
+
+          if (expense.isRecurring) {
+            for (let i = 0; i < 12; i++) {
+              const date = new Date(year, i, 1);
+              const month = format(date, "MMMM");
+              if (!acc[expense.expenseCategory.name!]) {
+                acc[expense.expenseCategory.name!] = {
+                  [month]: amount,
+                  Total: amount,
+                };
+              } else if (acc[expense.expenseCategory.name!]) {
+                if (!acc[expense.expenseCategory.name!]![month]) {
+                  acc[expense.expenseCategory.name!]![month] = amount;
+                }
+                acc[expense.expenseCategory.name!]!.Total += amount;
+              }
+            }
+            return acc;
+          }
+
+          if (!acc[expense.expenseCategory.name!]) {
+            acc[expense.expenseCategory.name!] = {
+              [month]: amount,
+              Total: amount,
+            };
+          }
+
+          if (acc[expense.expenseCategory.name!]) {
+            if (!acc[expense.expenseCategory.name!]![month]) {
+              acc[expense.expenseCategory.name!]![month] = amount;
+            } else {
+              acc[expense.expenseCategory.name!]![month] += amount;
+            }
+            acc[expense.expenseCategory.name!]!.Total += amount;
+          }
+
+          return acc;
+        },
+        {} as Record<string, { Total: number; [key: string]: number }>,
+      );
+
+      return expensesByCategory;
+    }),
 
   delete: protectedProcedure
     .input(
@@ -199,9 +293,10 @@ export const expenseRouter = createTRPCRouter({
         description: z.string().min(1),
         expenseCategoryId: z.string().min(1),
         expenseSubCategoryId: z.string().min(1),
+        endDate: z.date().optional().nullable(),
         recurring: z.boolean(),
         relatedDate: z.date(),
-        relatedSavingId: z.string(),
+        relatedSavingId: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -212,9 +307,12 @@ export const expenseRouter = createTRPCRouter({
           description: input.description,
           expenseCategoryId: parseInt(input.expenseCategoryId),
           expenseSubCategoryId: parseInt(input.expenseSubCategoryId),
+          endDate: input.endDate,
           isRecurring: input.recurring,
           relatedDate: input.relatedDate,
-          relatedSavingId: parseInt(input.relatedSavingId),
+          relatedSavingId: !!input.relatedSavingId
+            ? parseInt(input.relatedSavingId)
+            : null,
         })
         .where(eq(expenses.id, input.id));
 

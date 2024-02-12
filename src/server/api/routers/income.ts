@@ -91,17 +91,14 @@ export const incomeRouter = createTRPCRouter({
       });
 
       const incomesByMonth = incomes.reduce(
-        (
-          acc: Record<string, { Total: number; [key: string]: number }>,
-          income,
-        ) => {
-          const month = format(income.relatedDate, "MMM");
+        (acc, income) => {
+          const month = format(income.relatedDate, "MMMM yyyy");
           const amount = income.amount;
 
           if (income.isRecurring) {
             for (let i = 0; i < 12; i++) {
               const date = new Date(year, i, 1);
-              const month = format(date, "MMM");
+              const month = format(date, "MMMM yyyy");
               if (!acc[month]) {
                 acc[month] = {
                   [income.incomeCategory.name!]: amount,
@@ -135,11 +132,7 @@ export const incomeRouter = createTRPCRouter({
 
           return acc;
         },
-        {
-          Jan: {
-            Total: 0,
-          },
-        },
+        {} as Record<string, { Total: number; [key: string]: number }>,
       );
 
       return incomesByMonth;
@@ -166,12 +159,15 @@ export const incomeRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      await ctx.db.update(incomes).set({
-        amount: input.amount,
-        incomeCategoryId: parseInt(input.incomeCategoryId),
-        isRecurring: input.recurring,
-        relatedDate: input.relatedDate,
-      });
+      await ctx.db
+        .update(incomes)
+        .set({
+          amount: input.amount,
+          incomeCategoryId: parseInt(input.incomeCategoryId),
+          isRecurring: input.recurring,
+          relatedDate: input.relatedDate,
+        })
+        .where(eq(incomes.id, input.id));
 
       const category = await ctx.db.query.incomeCategories.findFirst({
         where: (category) => eq(category.id, parseInt(input.incomeCategoryId)),

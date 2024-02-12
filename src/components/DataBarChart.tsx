@@ -16,7 +16,9 @@ interface DataBarChartProps {
   data: IBarChartData[];
   height: number;
   truncateLabel?: boolean;
-  // maxBars?: number;
+  orientation?: "horizontal" | "vertical";
+  xDataKey?: string;
+  yDataKey?: string;
 }
 
 /**
@@ -27,6 +29,9 @@ export function DataBarChart({
   data,
   height,
   truncateLabel = true,
+  orientation = "horizontal",
+  xDataKey = "name",
+  yDataKey = "Total",
 }: DataBarChartProps) {
   // const maxBarSize = 50;
   // const minBarSize = 20;
@@ -51,9 +56,9 @@ export function DataBarChart({
 
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <BarChart data={data} maxBarSize={50}>
+      <BarChart data={data} maxBarSize={50} layout={orientation}>
         <XAxis
-          dataKey="name"
+          dataKey={xDataKey}
           stroke="#888888"
           fontSize={12}
           tickLine={false}
@@ -61,13 +66,20 @@ export function DataBarChart({
           tickFormatter={(value: string) =>
             truncateLabel ? `${value.toString().slice(0, 5)}` : value
           }
+          type={xDataKey === "name" ? "category" : "number"}
         />
         <YAxis
+          dataKey={yDataKey}
           stroke="#888888"
           fontSize={12}
           tickLine={false}
           axisLine={false}
-          tickFormatter={(value) => `$${value}`}
+          tickFormatter={
+            orientation === "horizontal"
+              ? (value) => `$${value}`
+              : (value: string) => `${value.toString().slice(0, 8)}`
+          }
+          type={yDataKey === "name" ? "category" : "number"}
         />
         <Tooltip
           content={<ChartCustomTooltip active payload={[]} label="" />}
@@ -95,7 +107,11 @@ export function DataBarChart({
               ),
           ),
         )} */}
-        <Bar dataKey="Total" fill="#7B39ED" radius={[4, 4, 0, 0]} />
+        <Bar
+          dataKey="Total"
+          fill="#7B39ED"
+          radius={orientation === "horizontal" ? [4, 4, 0, 0] : [0, 4, 4, 0]}
+        />
       </BarChart>
     </ResponsiveContainer>
   );

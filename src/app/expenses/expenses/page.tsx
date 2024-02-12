@@ -80,7 +80,7 @@ export default async function Expenses({ searchParams }: ExpensesProps) {
 
   return (
     <Layout title="Income & Expenses" viewsList={VIEWS_LIST}>
-      <section className="grid  grid-cols-8 gap-4  pt-10">
+      <section className="grid  grid-cols-8 gap-4  pt-4">
         <Card className=" col-span-5">
           <CardHeader>
             <CardTitle className=" font-normal tracking-tight">

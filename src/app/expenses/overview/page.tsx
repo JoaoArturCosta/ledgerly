@@ -63,8 +63,6 @@ const Expenses = async ({ searchParams }: ExpensesProps) => {
     relatedDate: new Date(relatedDate),
   });
 
-  console.log(allSavingsForCurrentMonth);
-
   const totalSavings = Object.entries(allSavingsForCurrentMonth).reduce(
     (acc, saving) => {
       return acc + saving[1];
@@ -126,7 +124,7 @@ const Expenses = async ({ searchParams }: ExpensesProps) => {
 
   return (
     <Layout title="Income & Expenses" viewsList={VIEWS_LIST}>
-      <section className="grid grid-cols-4 gap-4 pt-10">
+      <section className="grid grid-cols-4 gap-4 pt-4">
         {cardsList.map((card) => (
           <Card key={card.title}>
             <CardHeader>

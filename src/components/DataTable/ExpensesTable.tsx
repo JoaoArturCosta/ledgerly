@@ -39,7 +39,7 @@ declare module "@tanstack/table-core" {
 
 const fuzzyFilter: FilterFn<unknown> = (row, columnId, value, addMeta) => {
   // Rank the item
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-argument
   const itemRank = rankItem(row.getValue(columnId), value);
 
   // Store the itemRank info

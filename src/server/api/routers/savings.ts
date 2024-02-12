@@ -10,7 +10,11 @@ export const savingsRouter = createTRPCRouter({
   }),
   getAllSavings: protectedProcedure.query(async ({ ctx }) => {
     const allSavings = await ctx.db.query.savings.findMany({
-      where: (savings, { eq }) => eq(savings.createdById, ctx.session.user.id),
+      where: (savings, { eq, and }) =>
+        and(
+          eq(savings.enabled, true),
+          eq(savings.createdById, ctx.session.user.id),
+        ),
       with: {
         savingsCategory: true,
         savingWithdrawals: true,
@@ -153,6 +157,22 @@ export const savingsRouter = createTRPCRouter({
 
       return { success: true, savingsCategory: category };
     }),
+
+  delete: protectedProcedure
+    .input(
+      z.object({
+        id: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .update(savings)
+        .set({ enabled: false })
+        .where(eq(savings.id, input.id));
+
+      return { success: true };
+    }),
+
   getSavingsForMonth: protectedProcedure
     .input(
       z.object({
@@ -238,4 +258,102 @@ export const savingsRouter = createTRPCRouter({
 
       return { success: true, savingWithdrawal: input };
     }),
+
+  getSavingsWithdrawalsForYearByMonth: protectedProcedure
+    .input(
+      z.object({
+        relatedDate: z.date(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const year = input.relatedDate.getFullYear();
+
+      const savingsWithdrawals = await ctx.db.query.savingsWithdrawals.findMany(
+        {
+          where: (withdrawals, { and, eq, between }) =>
+            and(
+              eq(withdrawals.createdById, ctx.session.user.id),
+              between(
+                withdrawals.createdAt,
+                new Date(year, 0, 1),
+                new Date(year, 11, 31),
+              ),
+            ),
+
+          with: {
+            saving: true,
+          },
+        },
+      );
+
+      const savingsWithdrawalsByMonth = savingsWithdrawals.reduce(
+        (acc, withdrawal) => {
+          const month = format(withdrawal.createdAt, "MMMM yyyy");
+
+          if (!acc[month]) {
+            acc[month] = {
+              [withdrawal.saving.name!]: withdrawal.amount,
+              Total: withdrawal.amount,
+            };
+          } else if (acc[month]) {
+            if (!acc[month]![withdrawal.saving.name!]) {
+              acc[month]![withdrawal.saving.name!] = withdrawal.amount;
+            }
+
+            acc[month]!.Total += withdrawal.amount;
+          }
+
+          return acc;
+        },
+        {} as Record<string, { Total: number; [key: string]: number }>,
+      );
+
+      return savingsWithdrawalsByMonth;
+    }),
+
+  getSavingsByCategory: protectedProcedure.query(async ({ ctx }) => {
+    const savings = await ctx.db.query.savings.findMany({
+      where: (savings, { and, eq, gt, or }) =>
+        or(
+          and(
+            eq(savings.createdById, ctx.session.user.id),
+            gt(savings.depositedAmount, 0),
+          ),
+          and(
+            eq(savings.createdById, ctx.session.user.id),
+            gt(savings.startingAmount, 0),
+          ),
+        ),
+      with: {
+        expenses: true,
+        savingWithdrawals: true,
+        savingsCategory: true,
+      },
+    });
+
+    const savingsByCategory = savings.reduce(
+      (acc, saving) => {
+        const savingsCategoryName = saving.savingsCategory?.name;
+
+        if (!acc[savingsCategoryName!]) {
+          acc[savingsCategoryName!] = {
+            Total: 0,
+            Deposited: 0,
+            Withdrawn: 0,
+          };
+        }
+        acc[savingsCategoryName!]!.Total +=
+          (saving.startingAmount ?? 0) +
+          (saving.depositedAmount ?? 0) -
+          (saving.withdrawnAmount ?? 0);
+        acc[savingsCategoryName!]!.Deposited += saving.depositedAmount ?? 0;
+        acc[savingsCategoryName!]!.Withdrawn += saving.withdrawnAmount ?? 0;
+
+        return acc;
+      },
+      {} as Record<string, { Total: number; [key: string]: number }>,
+    );
+
+    return savingsByCategory;
+  }),
 });
