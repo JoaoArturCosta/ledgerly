@@ -1,9 +1,13 @@
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
+import { initializeDatabase } from "@/server/db/init";
 import { type NextRequest } from "next/server";
 
 import { env } from "@/env";
 import { appRouter } from "@/server/api/root";
 import { createTRPCContext } from "@/server/api/trpc";
+
+// Initialize the database when the server starts
+void initializeDatabase().catch(console.error);
 
 /**
  * This wraps the `createTRPCContext` helper and provides the required context for the tRPC API when
