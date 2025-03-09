@@ -27,12 +27,12 @@ export const expenseRouter = createTRPCRouter({
         expenseSubCategoryId: z.string().min(1),
         recurring: z.boolean(),
         relatedDate: z.date(),
-        relatedSavingId: z.string(),
+        relatedSavingId: z.string().optional().nullable(),
         endDate: z.date().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      await ctx.db.insert(expenses).values({
+      const expenseData = {
         amount: input.amount,
         description: input.description,
         expenseCategoryId: parseInt(input.expenseCategoryId),
@@ -40,37 +40,49 @@ export const expenseRouter = createTRPCRouter({
         isRecurring: input.recurring,
         relatedDate: input.relatedDate,
         createdById: ctx.session.user.id,
-        relatedSavingId: parseInt(input.relatedSavingId),
+        relatedSavingId:
+          input.relatedSavingId && input.relatedSavingId !== ""
+            ? parseInt(input.relatedSavingId)
+            : null,
         endDate: input.endDate,
-      });
+      };
 
-      if (!!input.relatedSavingId) {
+      await ctx.db.insert(expenses).values(expenseData);
+
+      // Only process saving-related logic if relatedSavingId is present and valid
+      if (input.relatedSavingId && input.relatedSavingId !== "") {
+        const savingId = parseInt(input.relatedSavingId);
         const relatedSaving = await ctx.db.query.savings.findFirst({
-          where: (saving) => eq(saving.id, parseInt(input.relatedSavingId)),
+          where: (saving) => eq(saving.id, savingId),
         });
 
-        let depositAmount = input.amount;
+        // Only proceed if we found the saving
+        if (relatedSaving) {
+          let depositAmount = input.amount;
 
-        if (input.recurring) {
-          const currentMonth = new Date().getMonth();
+          if (input.recurring) {
+            const currentMonth = new Date().getMonth();
 
-          let endMonth = 12;
+            let endMonth = 12;
 
-          if (input.endDate) {
-            endMonth = input.endDate.getMonth();
+            if (input.endDate) {
+              endMonth = input.endDate.getMonth();
+            }
+
+            const months = endMonth - currentMonth;
+
+            depositAmount = input.amount * months;
           }
 
-          const months = endMonth - currentMonth;
+          const currentDepositedAmount = relatedSaving.depositedAmount ?? 0;
 
-          depositAmount = input.amount * months;
+          await ctx.db
+            .update(savings)
+            .set({
+              depositedAmount: currentDepositedAmount + depositAmount,
+            })
+            .where(eq(savings.id, savingId));
         }
-
-        await ctx.db
-          .update(savings)
-          .set({
-            depositedAmount: relatedSaving!.depositedAmount! + depositAmount,
-          })
-          .where(eq(savings.id, parseInt(input.relatedSavingId)));
       }
 
       const subCategory = await ctx.db.query.expenseSubCategories.findFirst({
