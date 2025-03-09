@@ -89,7 +89,9 @@ export default function SavingsForm({
           name="savingsCategoryId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel htmlFor="savingsCategoryId">Category</FormLabel>
+              <FormLabel htmlFor="savingsCategoryId" className="flex">
+                Category <span className="ml-1 text-red-500">*</span>
+              </FormLabel>
               <SelectCategories
                 categoriesList={savingsCategories as SavingsCategory[]}
                 onValueChange={field.onChange}
@@ -106,13 +108,16 @@ export default function SavingsForm({
             name="finalAmount"
             render={({ field }) => (
               <FormItem>
-                <FormLabel htmlFor="finalAmount">Final Amount</FormLabel>
+                <FormLabel htmlFor="finalAmount" className="flex">
+                  Final Amount <span className="ml-1 text-red-500">*</span>
+                </FormLabel>
                 <FormControl>
                   <Input
                     id="finalAmount"
                     {...field}
                     type="number"
                     required
+                    placeholder="Required"
                     onChange={(value) =>
                       field.onChange(value.target.valueAsNumber)
                     }
@@ -129,12 +134,15 @@ export default function SavingsForm({
           name="startingAmount"
           render={({ field }) => (
             <FormItem>
-              <FormLabel htmlFor="startingAmount">Starting Amount</FormLabel>
+              <FormLabel htmlFor="startingAmount" className="flex">
+                Starting Amount <span className="ml-1 text-red-500">*</span>
+              </FormLabel>
               <FormControl>
                 <Input
                   id="startingAmount"
                   {...field}
                   type="number"
+                  placeholder="Required"
                   onChange={(value) =>
                     field.onChange(value.target.valueAsNumber)
                   }
@@ -149,9 +157,11 @@ export default function SavingsForm({
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel htmlFor="name">Name</FormLabel>
+              <FormLabel htmlFor="name" className="flex">
+                Name <span className="ml-1 text-red-500">*</span>
+              </FormLabel>
               <FormControl>
-                <Input id="name" {...field} />
+                <Input id="name" {...field} placeholder="Required" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -207,7 +217,11 @@ export default function SavingsForm({
 
         <DialogFooter className="sm:justify-start">
           <DialogClose asChild>
-            <Button type="submit" variant="default">
+            <Button
+              type="submit"
+              variant="default"
+              disabled={!form.formState.isValid || form.formState.isSubmitting}
+            >
               {buttonLabel ?? `Create Saving`}
             </Button>
           </DialogClose>

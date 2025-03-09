@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const ExpenseValidator = z.object({
   amount: z.number().min(1),
-  description: z.string().min(0),
+  description: z.string().min(1, "Description is required"),
   expenseCategoryId: z.string().min(1),
   expenseSubCategoryId: z.string().min(1),
   endDate: z.date().optional(),

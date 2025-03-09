@@ -121,7 +121,9 @@ export default function ExpensesForm({
           name="expenseCategoryId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel htmlFor="expenseCategoryId">Category</FormLabel>
+              <FormLabel htmlFor="expenseCategoryId" className="flex">
+                Category <span className="ml-1 text-red-500">*</span>
+              </FormLabel>
               <SelectCategories
                 categoriesList={expenseCategoriesList as ExpenseCategory[]}
                 onValueChange={field.onChange}
@@ -138,7 +140,9 @@ export default function ExpensesForm({
             name="expenseSubCategoryId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel htmlFor="expenseSubCategoryId">Type</FormLabel>
+                <FormLabel htmlFor="expenseSubCategoryId" className="flex">
+                  Type <span className="ml-1 text-red-500">*</span>
+                </FormLabel>
                 <SelectCategories
                   categoriesList={
                     selectedCategory?.subCategories ??
@@ -159,10 +163,15 @@ export default function ExpensesForm({
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel htmlFor="description">Description</FormLabel>
+              <FormLabel htmlFor="description" className="flex">
+                Description <span className="ml-1 text-red-500">*</span>
+              </FormLabel>
               <FormControl>
-                <Input id="description" {...field} />
+                <Input id="description" placeholder="Required" {...field} />
               </FormControl>
+              <FormDescription>
+                A brief description of your expense is required.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -172,12 +181,15 @@ export default function ExpensesForm({
           name="amount"
           render={({ field }) => (
             <FormItem>
-              <FormLabel htmlFor="amount">Amount</FormLabel>
+              <FormLabel htmlFor="amount" className="flex">
+                Amount <span className="ml-1 text-red-500">*</span>
+              </FormLabel>
               <FormControl>
                 <Input
                   id="amount"
                   {...field}
                   type="number"
+                  placeholder="Required"
                   onChange={(value) =>
                     field.onChange(value.target.valueAsNumber)
                   }
@@ -279,7 +291,11 @@ export default function ExpensesForm({
 
         <DialogFooter className="sm:justify-start">
           {/* <DialogClose asChild> */}
-          <Button type="submit" variant="default">
+          <Button
+            type="submit"
+            variant="default"
+            disabled={!form.formState.isValid || form.formState.isSubmitting}
+          >
             {buttonLabel ?? `Add Expense`}
           </Button>
           {/* </DialogClose> */}
