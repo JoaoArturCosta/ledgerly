@@ -1,6 +1,5 @@
 "use client";
 
-import { getColorWithOpacity } from "@/lib/utils/colors";
 import {
   Line,
   LineChart,
@@ -8,8 +7,10 @@ import {
   Tooltip,
   XAxis,
   YAxis,
+  Legend,
 } from "recharts";
 import ChartCustomTooltip from "./ChartCustomTooltip";
+import { getCategoryColor } from "@/lib/utils/chartColors";
 
 interface DataLineChartProps {
   data: {
@@ -27,45 +28,96 @@ export default function DataLineChart({
   noXAxis,
   noYAxis,
 }: DataLineChartProps) {
-  const numLines = Object.keys(data[0] ?? {}).length - 1;
+  if (!data || data.length === 0) {
+    return <div>No data available</div>;
+  }
+
+  // Check if it's a "Total" chart (Progress chart with a single line)
+  const isTotalChart =
+    data[0] && Object.keys(data[0]).some((k) => k === "Total");
+
+  // Get all keys except 'name' for lines
+  const dataKeys = data[0]
+    ? Object.keys(data[0]).filter((key) => key !== "name")
+    : [];
 
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <LineChart data={data}>
-        <XAxis
-          dataKey="name"
-          stroke="#888888"
-          fontSize={12}
-          tickLine={false}
-          axisLine={false}
-          tickFormatter={(value: string) => (noXAxis ? "" : value.slice(0, 3))}
-          minTickGap={1}
+      <LineChart
+        data={data}
+        margin={{
+          top: 5,
+          right: 15,
+          left: 0,
+          bottom: 5,
+        }}
+      >
+        <Tooltip
+          content={({ active, payload, label }) => (
+            <ChartCustomTooltip
+              active={!!active}
+              payload={payload || []}
+              label={label || ""}
+            />
+          )}
+          cursor={false}
         />
+        {!noXAxis && (
+          <XAxis
+            dataKey="name"
+            stroke="#888888"
+            fontSize={12}
+            tickLine={false}
+            axisLine={false}
+          />
+        )}
         {!noYAxis && (
           <YAxis
             stroke="#888888"
             fontSize={12}
             tickLine={false}
             axisLine={false}
-            tickFormatter={(value) => (noYAxis ? "" : `$ ${value}`)}
+            tickFormatter={(value) => (noYAxis ? "" : `$${value}`)}
           />
         )}
-        <Tooltip
-          content={<ChartCustomTooltip active payload={[]} label="" />}
-        />
-        {Object.entries(data[0] ?? {}).map(
-          (entry, index) =>
-            entry[0] !== "name" &&
-            entry[1] !== 0 && (
-              <Line
-                key={`${entry[0]}-${index}`}
-                dataKey={entry[0]}
-                type={"monotone"}
-                stroke={getColorWithOpacity(index, "#7B39ED", numLines)}
-                strokeWidth={2}
-              />
-            ),
-        )}
+        <Legend />
+
+        {dataKeys.map((key, index) => {
+          // Skip rendering lines with all zero values
+          const hasNonZeroValues = data.some(
+            (entry) => typeof entry[key] === "number" && entry[key] !== 0,
+          );
+
+          if (!hasNonZeroValues) {
+            return null;
+          }
+
+          // Get the appropriate color for this category/key
+          const lineColor = getCategoryColor(key, index);
+
+          return (
+            <Line
+              key={key}
+              type="monotone"
+              dataKey={key}
+              name={key}
+              stroke={lineColor}
+              strokeWidth={2}
+              dot={{
+                fill: "white", // White fill for dots
+                stroke: lineColor,
+                strokeWidth: 2,
+                r: 4,
+              }}
+              activeDot={{
+                fill: "white", // White fill for active dots
+                stroke: lineColor,
+                strokeWidth: 2,
+                r: 6,
+              }}
+            />
+          );
+        })}
       </LineChart>
     </ResponsiveContainer>
   );
