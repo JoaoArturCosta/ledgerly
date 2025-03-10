@@ -39,7 +39,10 @@ export const savingsRouter = createTRPCRouter({
 
           return {
             ...saving,
-            savedAmount: totalSaved - (saving.withdrawnAmount ?? 0),
+            savedAmount:
+              (saving.startingAmount ?? 0) +
+              totalSaved -
+              (saving.withdrawnAmount ?? 0),
           };
         }),
       ),
