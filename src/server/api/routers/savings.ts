@@ -79,50 +79,86 @@ export const savingsRouter = createTRPCRouter({
           date.setDate(currentDate.getDate() + 1);
           const month = format(date, "MMMM yyyy");
 
-          if (
-            Date.parse(saving.createdAt.toString()) >
-            Date.parse(date.toString())
-          ) {
-            continue;
-          }
+          // For now, we'll collect all savings from all months up to the current one
+          // in order to show a proper cumulative chart
+          let cumulativeDepositsToDate = 0;
+          let cumulativeWithdrawalsToDate = 0;
+
+          // Calculate all deposits made up to this month point
+          saving.expenses.forEach((expense) => {
+            if (expense.relatedDate && expense.relatedDate <= date) {
+              cumulativeDepositsToDate += expense.amount;
+            }
+          });
+
+          // Calculate all withdrawals made up to this month point
+          saving.savingWithdrawals.forEach((withdrawal) => {
+            if (withdrawal.createdAt && withdrawal.createdAt <= date) {
+              cumulativeWithdrawalsToDate += withdrawal.amount;
+            }
+          });
 
           const depositsForMonth = saving.expenses
-            .filter(
-              (expense) =>
-                expense.relatedDate?.getMonth() === i &&
+            .filter((expense) => {
+              // Calculate month offset - for i=5 (oldest), we want current month - 5
+              // For i=0 (current), we want current month - 0
+              const targetMonthIndex = (currentDate.getMonth() + 12 - i) % 12; // Ensure it wraps around properly
+
+              const matchesMonth =
+                expense.relatedDate?.getMonth() === targetMonthIndex;
+              const matchesYear =
                 expense.relatedDate?.getFullYear() ===
-                  currentDate.getFullYear(),
-            )
+                (targetMonthIndex > currentDate.getMonth()
+                  ? currentDate.getFullYear() - 1
+                  : currentDate.getFullYear());
+
+              return matchesMonth && matchesYear;
+            })
             .reduce((total, expense) => {
               return total + expense.amount;
             }, 0);
 
           const withdrawalsForMonth = saving.savingWithdrawals
-            .filter(
-              (withdrawal) =>
-                withdrawal.createdAt?.getMonth() === i &&
+            .filter((withdrawal) => {
+              // Calculate month offset - for i=5 (oldest), we want current month - 5
+              // For i=0 (current), we want current month - 0
+              const targetMonthIndex = (currentDate.getMonth() + 12 - i) % 12; // Ensure it wraps around properly
+
+              const matchesMonth =
+                withdrawal.createdAt?.getMonth() === targetMonthIndex;
+              const matchesYear =
                 withdrawal.createdAt?.getFullYear() ===
-                  currentDate.getFullYear(),
-            )
+                (targetMonthIndex > currentDate.getMonth()
+                  ? currentDate.getFullYear() - 1
+                  : currentDate.getFullYear());
+
+              return matchesMonth && matchesYear;
+            })
             .reduce((total, withdrawal) => {
               return total + withdrawal.amount;
             }, 0);
 
           if (!acc[month]) {
-            acc[month] = {
+            const newMonthValue = {
               [saving.name!]:
                 saving.startingAmount! + depositsForMonth - withdrawalsForMonth,
               Total:
                 saving.startingAmount! + depositsForMonth - withdrawalsForMonth,
             };
+
+            acc[month] = newMonthValue;
           } else if (acc[month]) {
             if (!acc[month]![saving.name!]) {
-              acc[month]![saving.name!] =
+              const savingValue =
                 saving.startingAmount! + depositsForMonth - withdrawalsForMonth;
+
+              acc[month]![saving.name!] = savingValue;
             }
 
-            acc[month]!.Total +=
+            const addToTotal =
               saving.startingAmount! + depositsForMonth - withdrawalsForMonth;
+            console.log(`  Adding to Total for ${month}: $${addToTotal}`);
+            acc[month]!.Total += addToTotal;
           }
         }
 
