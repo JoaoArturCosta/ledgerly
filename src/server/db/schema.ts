@@ -1,6 +1,7 @@
 import { type InferSelectModel, relations, sql } from "drizzle-orm";
 import {
   boolean,
+  decimal,
   index,
   integer,
   pgTableCreator,
@@ -275,3 +276,58 @@ export const verificationTokens = pgTable(
     compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
   }),
 );
+
+/**
+ * Banking integration tables
+ */
+export const bankConnections = pgTable("bank_connections", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  userId: varchar("user_id", { length: 255 })
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  providerName: varchar("provider_name", { length: 50 }).notNull(),
+  providerAccountId: varchar("provider_account_id", { length: 255 }).notNull(),
+  accessToken: text("access_token").notNull(),
+  refreshToken: text("refresh_token"),
+  consentId: varchar("consent_id", { length: 255 }),
+  bankId: varchar("bank_id", { length: 255 }),
+  status: varchar("status", { length: 20 }).notNull().default("active"),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const bankAccounts = pgTable("bank_accounts", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  connectionId: varchar("connection_id", { length: 255 })
+    .notNull()
+    .references(() => bankConnections.id, { onDelete: "cascade" }),
+  accountName: varchar("account_name", { length: 255 }).notNull(),
+  accountType: varchar("account_type", { length: 50 }),
+  accountNumber: varchar("account_number", { length: 50 }),
+  balance: decimal("balance", { precision: 10, scale: 2 }),
+  currency: varchar("currency", { length: 3 }).notNull(),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+});
+
+export const bankTransactions = pgTable("bank_transactions", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  accountId: varchar("account_id", { length: 255 })
+    .notNull()
+    .references(() => bankAccounts.id, { onDelete: "cascade" }),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  date: timestamp("date").notNull(),
+  description: varchar("description", { length: 255 }),
+  merchantName: varchar("merchant_name", { length: 255 }),
+  category: varchar("category", { length: 100 }),
+  pending: boolean("pending").default(false),
+  synced: boolean("synced").default(false),
+  expenseId: varchar("expense_id", { length: 255 }).references(
+    () => expenses.id,
+  ),
+});
+
+// Add these type exports
+export type BankConnection = InferSelectModel<typeof bankConnections>;
+export type BankAccount = InferSelectModel<typeof bankAccounts>;
+export type BankTransaction = InferSelectModel<typeof bankTransactions>;

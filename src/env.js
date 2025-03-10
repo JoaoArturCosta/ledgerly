@@ -34,6 +34,18 @@ export const env = createEnv({
     DISCORD_CLIENT_SECRET: z.string(),
     GOOGLE_CLIENT_ID: z.string(),
     GOOGLE_CLIENT_SECRET: z.string(),
+
+    // Banking integration variables
+    SIBS_API_URL: z.string().optional(),
+    SIBS_CLIENT_ID: z.string().optional(),
+    SIBS_CLIENT_SECRET: z.string().optional(),
+    SIBS_REDIRECT_URI: z.string().optional(),
+    SIBS_CERTIFICATE: z.string().optional(),
+    SIBS_CERTIFICATE_KEY: z.string().optional(),
+
+    TRUELAYER_CLIENT_ID: z.string().optional(),
+    TRUELAYER_CLIENT_SECRET: z.string().optional(),
+    TRUELAYER_REDIRECT_URI: z.string().optional(),
   },
 
   /**
@@ -60,6 +72,18 @@ export const env = createEnv({
     DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+
+    // Banking integration variables
+    SIBS_API_URL: process.env.SIBS_API_URL,
+    SIBS_CLIENT_ID: process.env.SIBS_CLIENT_ID,
+    SIBS_CLIENT_SECRET: process.env.SIBS_CLIENT_SECRET,
+    SIBS_REDIRECT_URI: process.env.SIBS_REDIRECT_URI,
+    SIBS_CERTIFICATE: process.env.SIBS_CERTIFICATE,
+    SIBS_CERTIFICATE_KEY: process.env.SIBS_CERTIFICATE_KEY,
+
+    TRUELAYER_CLIENT_ID: process.env.TRUELAYER_CLIENT_ID,
+    TRUELAYER_CLIENT_SECRET: process.env.TRUELAYER_CLIENT_SECRET,
+    TRUELAYER_REDIRECT_URI: process.env.TRUELAYER_REDIRECT_URI,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
@@ -67,8 +91,8 @@ export const env = createEnv({
    */
   skipValidation: !!process.env.SKIP_ENV_VALIDATION,
   /**
-   * Makes it so that empty strings are treated as undefined. `SOME_VAR: z.string()` and
-   * `SOME_VAR=''` will throw an error.
+   * Makes it so that empty strings are treated as undefined.
+   * `SOME_VAR: z.string()` and `SOME_VAR=''` will throw an error.
    */
   emptyStringAsUndefined: true,
 });
