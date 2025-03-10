@@ -83,6 +83,11 @@ export const defaultExpenseCategories: Omit<
     createdById: "system",
   },
   {
+    name: "Savings & Investments",
+    iconFaName: "piggy-bank",
+    createdById: "system",
+  },
+  {
     name: "Other",
     iconFaName: "ellipsis-h",
     createdById: "system",

@@ -49,7 +49,7 @@ The monorepo is split between `apps` and `packages` directories.
 Clone & create this repo locally with the following command:
 
 ```bash
-git clone https://github.com/meglerhagen/ledgerly.git
+git clone https://github.com/JoaoArturCosta/ledgerly.git
 ```
 
 1. Install dependencies using yarn:
@@ -66,7 +66,7 @@ cp .env.example .env.local
 
 4. Input everything you need for the env.
 
-   1. Create [Planet Scale](https://planetscale.com/) Account
+   1. Create [Supabase](https://supabase.com/) Account
    2. Create [Resend](https://resend.com) Account
    3. Create [Stripe](https://stripe.com) Account
    4. Create [Edge Store](https://edgestore.dev) Account

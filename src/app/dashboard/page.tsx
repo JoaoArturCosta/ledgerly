@@ -55,7 +55,9 @@ export default async function Dashboard({ searchParams }: DashboardProps) {
     });
   }
 
-  const networthTotal = savingsByMonth[format(relatedDate, "MMMM yyyy")]!.Total;
+  const currentMonthKey = format(relatedDate, "MMMM yyyy");
+  const currentMonthData = savingsByMonth[currentMonthKey];
+  const networthTotal = currentMonthData?.Total ?? 0;
 
   const incomesByMonth = await api.income.getIncomesByYear.query({
     relatedDate: new Date(relatedDate),
@@ -64,7 +66,7 @@ export default async function Dashboard({ searchParams }: DashboardProps) {
   const incomesChartData = Object.entries(incomesByMonth).map((income) => {
     return {
       name: income[0],
-      Total: income[1].Total,
+      Total: income[1]?.Total ?? 0,
     };
   });
 
@@ -76,7 +78,7 @@ export default async function Dashboard({ searchParams }: DashboardProps) {
   }
 
   const incomesTotal = Object.entries(incomesByMonth).reduce((acc, income) => {
-    return acc + income[1].Total;
+    return acc + (income[1]?.Total ?? 0);
   }, 0);
 
   const allExpensesForCurrentYear =
@@ -93,14 +95,14 @@ export default async function Dashboard({ searchParams }: DashboardProps) {
     (expense) => {
       return {
         name: expense[0],
-        Total: expense[1].Total,
+        Total: expense[1]?.Total ?? 0,
       };
     },
   );
 
   const expensesTotal = Object.entries(allExpensesForCurrentYear).reduce(
     (acc, expense) => {
-      return acc + expense[1].Total;
+      return acc + (expense[1]?.Total ?? 0);
     },
     0,
   );
@@ -111,14 +113,14 @@ export default async function Dashboard({ searchParams }: DashboardProps) {
     (saving) => {
       return {
         name: saving[0],
-        Total: saving[1].Total,
+        Total: saving[1]?.Total ?? 0,
       };
     },
   );
 
   const savingsTotal = Object.entries(allSavingsByCategory).reduce(
     (acc, saving) => {
-      return acc + saving[1].Total;
+      return acc + (saving[1]?.Total ?? 0);
     },
     0,
   );
@@ -130,7 +132,7 @@ export default async function Dashboard({ searchParams }: DashboardProps) {
 
   const totalWithdrawals = Object.entries(savingsWithdrawalsForYear).reduce(
     (acc, saving) => {
-      return acc + saving[1].Total;
+      return acc + (saving[1]?.Total ?? 0);
     },
     0,
   );
@@ -298,7 +300,7 @@ export default async function Dashboard({ searchParams }: DashboardProps) {
                   <TableRow key={income[0]}>
                     <TableCell>{income[0]}</TableCell>
                     <TableCell className="text-right">
-                      {income[1].Total} $
+                      {income[1]?.Total ?? 0} $
                     </TableCell>
                   </TableRow>
                 ))}
@@ -332,7 +334,7 @@ export default async function Dashboard({ searchParams }: DashboardProps) {
                     <TableRow key={expense[0]}>
                       <TableCell>{expense[0]}</TableCell>
                       <TableCell className="text-right">
-                        {expense[1].Total} $
+                        {expense[1]?.Total ?? 0} $
                       </TableCell>
                     </TableRow>
                   ),
@@ -368,7 +370,7 @@ export default async function Dashboard({ searchParams }: DashboardProps) {
                   <TableRow key={saving[0]}>
                     <TableCell>{saving[0]}</TableCell>
                     <TableCell className="text-right">
-                      {saving[1].Total} $
+                      {saving[1]?.Total ?? 0} $
                     </TableCell>
                   </TableRow>
                 ))}
