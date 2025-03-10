@@ -8,7 +8,7 @@ export const ExpenseValidator = z.object({
   endDate: z.date().optional(),
   recurring: z.boolean(),
   relatedDate: z.date(),
-  relatedSavingId: z.string().min(0).optional(),
+  relatedSavingId: z.string().optional(),
 });
 
 export type TExpenseValidator = z.infer<typeof ExpenseValidator>;

@@ -40,10 +40,35 @@ export function ExpensesDialog({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [, setOpen] = useState(false);
+  // Don't auto-open the dialog based on savingId
+  const [open, setOpen] = useState(false);
   const [relatedSavingId, setRelatedSavingId] = useState<string>(
     savingId ?? "",
   );
+
+  const { data: categories } = api.expense.getAllCategories.useQuery();
+
+  // Find the Savings & Investments category ID and subcategory ID dynamically
+  const { savingsInvestmentsCategoryId, defaultSavingsSubcategoryId } =
+    useMemo(() => {
+      if (!categories)
+        return {
+          savingsInvestmentsCategoryId: "",
+          defaultSavingsSubcategoryId: "",
+        };
+
+      // Find a subcategory that belongs to the "Savings & Investments" category
+      const savingsSubCategory = categories.find(
+        (subCategory) =>
+          subCategory.expenseCategory.name === "Savings & Investments",
+      );
+
+      return {
+        savingsInvestmentsCategoryId:
+          savingsSubCategory?.expenseCategory.id.toString() ?? "",
+        defaultSavingsSubcategoryId: savingsSubCategory?.id.toString() ?? "",
+      };
+    }, [categories]);
 
   const relatedDate = useMemo(() => {
     if (searchParams.get("month")) {
@@ -58,7 +83,7 @@ export function ExpensesDialog({
     defaultValues: {
       amount: 0,
       description: "",
-      expenseCategoryId: relatedSavingId ? "18" : "",
+      expenseCategoryId: "", // We'll set this in the useEffect
       expenseSubCategoryId: "",
       recurring: false,
       relatedDate: relatedDate,
@@ -70,11 +95,43 @@ export function ExpensesDialog({
     setRelatedSavingId(id);
   };
 
+  // Set the "Savings & Investments" category when the dialog mounts and savingId is provided
   useEffect(() => {
-    if (form.getValues().expenseCategoryId === "18") {
-      form.setValue("relatedSavingId", relatedSavingId ?? "");
+    if (savingsInvestmentsCategoryId && savingId && savingId !== "0") {
+      // Set the category to "Savings & Investments"
+      form.setValue("expenseCategoryId", savingsInvestmentsCategoryId);
+
+      // Set the subcategory if available
+      if (defaultSavingsSubcategoryId) {
+        form.setValue("expenseSubCategoryId", defaultSavingsSubcategoryId);
+      }
+
+      // Set the description to a default value
+      form.setValue("description", "Adding money to savings");
     }
-  }, [relatedSavingId, form]);
+  }, [
+    savingsInvestmentsCategoryId,
+    defaultSavingsSubcategoryId,
+    savingId,
+    form,
+  ]);
+
+  // Update the relatedSavingId when the category is "Savings & Investments"
+  useEffect(() => {
+    const selectedCategoryId = form.getValues().expenseCategoryId;
+
+    // Use the dynamic savingsInvestmentsCategoryId instead of checking the name
+    const isSavingsCategory =
+      selectedCategoryId === savingsInvestmentsCategoryId &&
+      savingsInvestmentsCategoryId !== "";
+
+    if (isSavingsCategory) {
+      form.setValue(
+        "relatedSavingId",
+        relatedSavingId && relatedSavingId !== "0" ? relatedSavingId : "0",
+      );
+    }
+  }, [relatedSavingId, form, savingsInvestmentsCategoryId]);
 
   const { mutate: submit } = api.expense.create.useMutation({
     onSuccess: async ({ expenseSubCategory }) => {
@@ -100,7 +157,7 @@ export function ExpensesDialog({
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger className={className} asChild>
         <Button variant="outline" className="items-left flex gap-2 ">
           {triggerLabel ?? `Add Expense`} <Plus className="h-3 w-3" />{" "}

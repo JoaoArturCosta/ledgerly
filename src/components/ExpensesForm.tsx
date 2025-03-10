@@ -11,9 +11,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { type UseFormReturn } from "react-hook-form";
-import SelectCategories from "./SelectCategories";
+import SelectCategories from "@/components/SelectCategories";
 import { api } from "@/trpc/react";
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import {
   type ExpenseCategory,
   type ExpenseSubCategory,
@@ -29,6 +29,7 @@ import { CalendarIcon, Trash2 } from "lucide-react";
 import { Calendar } from "./ui/calendar";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import SelectSavings from "@/components/SelectSavings";
 
 interface ExpensesFormProps {
   form: UseFormReturn<TExpenseValidator>;
@@ -51,6 +52,8 @@ export default function ExpensesForm({
 }: ExpensesFormProps) {
   const { data: expenseSubCategories, isLoading } =
     api.expense.getAllCategories.useQuery();
+
+  const { data: allSavings } = api.savings.getAllSavings.useQuery();
 
   const expenseCategoriesList = expenseSubCategories?.reduce(
     (acc, subCategory) => {
@@ -82,8 +85,50 @@ export default function ExpensesForm({
     [selectedCategoryId, expenseCategoriesList],
   );
 
+  // Sort categories to ensure "Other" is always last
+  const sortedCategoriesList = useMemo(() => {
+    if (!expenseCategoriesList) return [];
+
+    return [...expenseCategoriesList].sort((a, b) => {
+      const nameA = a.name ?? "";
+      const nameB = b.name ?? "";
+
+      // "Other" should always be last
+      if (nameA === "Other") return 1;
+      if (nameB === "Other") return -1;
+
+      // "Savings & Investments" should be second-to-last
+      if (nameA === "Savings & Investments" && nameB !== "Other") return 1;
+      if (nameB === "Savings & Investments" && nameA !== "Other") return -1;
+
+      // Alphabetical order for the rest
+      return nameA.localeCompare(nameB);
+    });
+  }, [expenseCategoriesList]);
+
   const watchCategory = form.watch("expenseCategoryId");
   const watchIsRecurring = form.watch("recurring");
+  const watchRelatedSavingId = form.watch("relatedSavingId");
+
+  const isSavingsCategory = useMemo(() => {
+    if (!expenseCategoriesList) return false;
+    const category = expenseCategoriesList.find(
+      (cat) => cat.name === "Savings & Investments",
+    );
+    return category && selectedCategoryId === category.id.toString();
+  }, [expenseCategoriesList, selectedCategoryId]);
+
+  useEffect(() => {
+    if (isSavingsCategory && !watchRelatedSavingId && allSavings?.length) {
+      form.setValue("description", "Adding money to savings");
+    }
+
+    // Set a default subcategory ID for savings category to satisfy schema
+    if (isSavingsCategory) {
+      // Use a fallback value for subcategory to satisfy schema requirements
+      form.setValue("expenseSubCategoryId", "1");
+    }
+  }, [isSavingsCategory, watchRelatedSavingId, allSavings, form]);
 
   if (isLoading) {
     return (
@@ -125,8 +170,13 @@ export default function ExpensesForm({
                 Category <span className="ml-1 text-red-500">*</span>
               </FormLabel>
               <SelectCategories
-                categoriesList={expenseCategoriesList as ExpenseCategory[]}
-                onValueChange={field.onChange}
+                categoriesList={sortedCategoriesList as ExpenseCategory[]}
+                onValueChange={(value) => {
+                  field.onChange(value);
+                  if (!isSavingsCategory) {
+                    form.setValue("relatedSavingId", "");
+                  }
+                }}
                 defaultValue={field.value.toString()}
               />
               <FormMessage />
@@ -134,7 +184,7 @@ export default function ExpensesForm({
           )}
         />
 
-        {watchCategory && (
+        {watchCategory && !isSavingsCategory && (
           <FormField
             control={form.control}
             name="expenseSubCategoryId"
@@ -152,6 +202,47 @@ export default function ExpensesForm({
                   onValueChange={field.onChange}
                   defaultValue={field.value.toString()}
                 />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        {isSavingsCategory && (
+          <FormField
+            control={form.control}
+            name="relatedSavingId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel htmlFor="relatedSavingId" className="flex">
+                  Saving <span className="ml-1 text-red-500">*</span>
+                </FormLabel>
+                <FormControl>
+                  <SelectSavings
+                    savingsList={allSavings ?? []}
+                    onValueChange={(value) => {
+                      if (value) {
+                        field.onChange(value);
+                        handleRelatedSavingId(value);
+
+                        const saving = allSavings?.find(
+                          (s) => s.id.toString() === value,
+                        );
+                        if (saving) {
+                          form.setValue(
+                            "description",
+                            `Adding money to ${saving.name}`,
+                          );
+                        }
+                      }
+                    }}
+                    defaultValue={field.value ?? "0"}
+                    placeholder="Select a saving"
+                  />
+                </FormControl>
+                <FormDescription>
+                  Select the saving you want to add money to
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -200,9 +291,12 @@ export default function ExpensesForm({
           )}
         />
 
-        {watchCategory && selectedCategoryId === "18" && !hasRelatedSaving && (
-          <SavingsDrawer handleRelatedSavingId={handleRelatedSavingId} />
-        )}
+        {watchCategory &&
+          !isSavingsCategory &&
+          selectedCategoryId === "18" &&
+          !hasRelatedSaving && (
+            <SavingsDrawer handleRelatedSavingId={handleRelatedSavingId} />
+          )}
 
         <FormField
           control={form.control}
@@ -290,15 +384,17 @@ export default function ExpensesForm({
         )}
 
         <DialogFooter className="sm:justify-start">
-          {/* <DialogClose asChild> */}
           <Button
             type="submit"
             variant="default"
-            disabled={!form.formState.isValid || form.formState.isSubmitting}
+            disabled={
+              !form.formState.isValid ||
+              form.formState.isSubmitting ||
+              (isSavingsCategory && !watchRelatedSavingId)
+            }
           >
             {buttonLabel ?? `Add Expense`}
           </Button>
-          {/* </DialogClose> */}
         </DialogFooter>
       </form>
     </Form>

@@ -7,6 +7,9 @@ import { ThemeProviders } from "@/theme/Provider";
 import { AuthProvider } from "./auth/Provider";
 import { Toaster } from "@/components/ui/toaster";
 
+// Import startup script to ensure it runs on app initialization
+import "@/app/startup";
+
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
