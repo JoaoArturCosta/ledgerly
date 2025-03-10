@@ -186,7 +186,17 @@ export const savingsRouter = createTRPCRouter({
       const year = input.relatedDate.getFullYear();
       const month = input.relatedDate.getMonth();
 
-      const savings = await ctx.db.query.expenses.findMany({
+      // First, find the Savings & Investments category by name
+      const savingsInvestmentsCategory =
+        await ctx.db.query.expenseCategories.findFirst({
+          where: (category) => eq(category.name, "Savings & Investments"),
+        });
+
+      if (!savingsInvestmentsCategory) {
+        return {}; // Return empty object if category doesn't exist
+      }
+
+      const expenses = await ctx.db.query.expenses.findMany({
         where: (expenses, { and, eq, or, between }) =>
           or(
             and(
@@ -196,11 +206,11 @@ export const savingsRouter = createTRPCRouter({
                 new Date(year, month, 1),
                 new Date(year, month, 31),
               ),
-              eq(expenses.expenseCategoryId, 18),
+              eq(expenses.expenseCategoryId, savingsInvestmentsCategory.id),
             ),
             and(
               eq(expenses.isRecurring, true),
-              eq(expenses.expenseCategoryId, 18),
+              eq(expenses.expenseCategoryId, savingsInvestmentsCategory.id),
             ),
           ),
         with: {
@@ -208,18 +218,30 @@ export const savingsRouter = createTRPCRouter({
         },
       });
 
-      const savingsCategory = await ctx.db.query.savingsCategories.findMany();
+      // Get savings categories for grouping expenses
+      const savingsCategories = await ctx.db.query.savingsCategories.findMany();
 
-      const savingsByCategory = savings.reduce(
+      const savingsByCategory = expenses.reduce(
         (acc, expense) => {
-          const savingsCategoryName = savingsCategory.find(
-            (category) => category.id === expense.saving?.savingsCategoryId,
-          )?.name;
-
-          if (!acc[savingsCategoryName!]) {
-            acc[savingsCategoryName!] = 0;
+          if (!expense.saving) {
+            return acc; // Skip if no related saving
           }
-          acc[savingsCategoryName!] += expense.amount;
+
+          // Find the category for this saving, default to "Uncategorized" if not found
+          const savingCategoryId = expense.saving.savingsCategoryId ?? 0;
+          const savingCategory = savingsCategories.find(
+            (category) => category.id === savingCategoryId,
+          );
+
+          const categoryName = savingCategory?.name ?? "Uncategorized";
+
+          // Initialize if not exists
+          if (!acc[categoryName]) {
+            acc[categoryName] = 0;
+          }
+
+          // Add the expense amount to the category total
+          acc[categoryName] += expense.amount;
           return acc;
         },
         {} as Record<string, number>,
