@@ -69,9 +69,9 @@ export const env = createEnv({
     SIBS_CERTIFICATE: process.env.SIBS_CERTIFICATE,
     SIBS_CERTIFICATE_KEY: process.env.SIBS_CERTIFICATE_KEY,
 
-    TRUELAYER_CLIENT_ID: process.env.TRUELAYER_CLIENT_ID,
-    TRUELAYER_CLIENT_SECRET: process.env.TRUELAYER_CLIENT_SECRET,
-    TRUELAYER_REDIRECT_URI: process.env.TRUELAYER_REDIRECT_URI,
+    TRUELAYER_CLIENT_ID: process.env.TRUE_LAYER_CLIENT_ID,
+    TRUELAYER_CLIENT_SECRET: process.env.TRUE_LAYER_CLIENT_SECRET,
+    TRUELAYER_REDIRECT_URI: process.env.TRUE_LAYER_REDIRECT_URI,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

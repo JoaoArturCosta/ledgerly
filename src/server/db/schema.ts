@@ -322,12 +322,47 @@ export const bankTransactions = pgTable("bank_transactions", {
   category: varchar("category", { length: 100 }),
   pending: boolean("pending").default(false),
   synced: boolean("synced").default(false),
-  expenseId: varchar("expense_id", { length: 255 }).references(
-    () => expenses.id,
-  ),
+  expenseId: integer("expense_id").references(() => expenses.id),
 });
 
 // Add these type exports
 export type BankConnection = InferSelectModel<typeof bankConnections>;
 export type BankAccount = InferSelectModel<typeof bankAccounts>;
 export type BankTransaction = InferSelectModel<typeof bankTransactions>;
+
+// Add relations for bank connections and accounts
+export const bankConnectionsRelations = relations(
+  bankConnections,
+  ({ one, many }) => ({
+    user: one(users, {
+      fields: [bankConnections.userId],
+      references: [users.id],
+    }),
+    accounts: many(bankAccounts),
+  }),
+);
+
+export const bankAccountsRelations = relations(
+  bankAccounts,
+  ({ one, many }) => ({
+    connection: one(bankConnections, {
+      fields: [bankAccounts.connectionId],
+      references: [bankConnections.id],
+    }),
+    transactions: many(bankTransactions),
+  }),
+);
+
+export const bankTransactionsRelations = relations(
+  bankTransactions,
+  ({ one }) => ({
+    account: one(bankAccounts, {
+      fields: [bankTransactions.accountId],
+      references: [bankAccounts.id],
+    }),
+    expense: one(expenses, {
+      fields: [bankTransactions.expenseId],
+      references: [expenses.id],
+    }),
+  }),
+);
