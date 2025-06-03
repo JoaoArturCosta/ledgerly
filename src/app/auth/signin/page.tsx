@@ -1,7 +1,7 @@
 import AuthButton from "@/components/AuthButton";
+import Logo from "@/components/Logo";
 import { Separator } from "@/components/ui/separator";
 import { getServerAuthSession } from "@/server/auth";
-import { Boxes } from "lucide-react";
 import { getProviders } from "next-auth/react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -20,9 +20,8 @@ export default async function SignIn() {
   return (
     <section className="grid h-screen w-screen grid-cols-2">
       <div className="col-span-1 bg-primary">
-        <div className="flex w-full  items-center gap-3 p-6">
-          <Boxes className="h-12 w-12 " />
-          <h1 className=" text-3xl font-semibold  ">Kleero</h1>
+        <div className="flex w-full items-center p-6">
+          <Logo variant="signin" className="gap-3" />
         </div>
       </div>
       <div className="col-span-1 flex  flex-col items-center justify-center">

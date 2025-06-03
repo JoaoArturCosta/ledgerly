@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getServerAuthSession } from "@/server/auth";
 import { Button } from "@/components/ui/button";
+import Logo from "@/components/Logo";
 import {
   Card,
   CardDescription,
@@ -28,12 +29,7 @@ export default async function Home() {
       {/* Navigation */}
       <nav className="border-b bg-white/50 backdrop-blur-sm dark:bg-slate-900/50">
         <div className="container mx-auto flex items-center justify-between px-4 py-4">
-          <div className="flex items-center space-x-2">
-            <DollarSign className="h-8 w-8 text-blue-600" />
-            <span className="text-2xl font-bold text-slate-900 dark:text-white">
-              Kleero
-            </span>
-          </div>
+          <Logo variant="header" />
           <div className="flex items-center space-x-4">
             {session ? (
               <div className="flex items-center space-x-4">
@@ -307,9 +303,8 @@ export default async function Home() {
         <div className="container mx-auto px-4 py-12">
           <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
             <div>
-              <div className="mb-4 flex items-center space-x-2">
-                <DollarSign className="h-6 w-6 text-blue-400" />
-                <span className="text-xl font-bold">Kleero</span>
+              <div className="mb-4">
+                <Logo variant="footer" />
               </div>
               <p className="text-slate-400">
                 Revolutionizing financial management with AI-driven insights and

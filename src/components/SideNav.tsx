@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import Logo from "@/components/Logo";
 
 import { NavItems } from "@/components/constants/side-nav";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
-import { Boxes } from "lucide-react";
 import { usePathname } from "next/navigation";
 import {
   HoverCard,
@@ -27,12 +27,15 @@ const SideNav = ({ isCollapsed, setOpen, className }: SideNavProps) => {
       <Link
         href="/"
         className={cn(
-          `flex items-center justify-items-start gap-2 pb-6`,
+          `flex items-center justify-items-start pb-6`,
           isCollapsed && "justify-center gap-0",
         )}
       >
-        <Boxes className="h-8 w-8" />
-        {!isCollapsed && <h1 className=" text-lg font-semibold ">Kleero</h1>}
+        <Logo
+          variant="sidebar"
+          isCollapsed={isCollapsed}
+          className={cn("gap-2", isCollapsed && "justify-center gap-0")}
+        />
       </Link>
       {NavItems.map((item) => (
         <HoverCard key={item.title}>
