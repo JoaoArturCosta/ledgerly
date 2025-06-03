@@ -13,11 +13,11 @@ const config = {
         destination: "/expenses/overview",
         permanent: true,
       },
-      {
-        source: "/",
-        destination: "/api/auth/signin",
-        permanent: true
-      }
+      // {
+      //   source: "/",
+      //   destination: "/api/auth/signin",
+      //   permanent: true
+      // }
     ];
   },
 };

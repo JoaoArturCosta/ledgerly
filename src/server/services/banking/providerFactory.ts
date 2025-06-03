@@ -3,12 +3,12 @@ import { SibsProvider } from "./providers/sibsProvider";
 import { TrueLayerProvider } from "./providers/trueLayerProvider";
 import fs from "fs";
 import path from "path";
-import { env } from "@/env.mjs";
+import { env } from "@/env.js";
 
 // Get SIBS certificates (load from env or file)
 const getSibsCertificates = () => {
   const certificate =
-    env.SIBS_CERTIFICATE ||
+    env.SIBS_CERTIFICATE ??
     (fs.existsSync(path.join(process.cwd(), "certificates/sibs.crt"))
       ? fs.readFileSync(
           path.join(process.cwd(), "certificates/sibs.crt"),
@@ -17,7 +17,7 @@ const getSibsCertificates = () => {
       : "");
 
   const certificateKey =
-    env.SIBS_CERTIFICATE_KEY ||
+    env.SIBS_CERTIFICATE_KEY ??
     (fs.existsSync(path.join(process.cwd(), "certificates/sibs.key"))
       ? fs.readFileSync(
           path.join(process.cwd(), "certificates/sibs.key"),
@@ -44,10 +44,12 @@ export function getBankingProvider(providerName: string): BankingProvider {
       }
 
       return new SibsProvider({
-        baseUrl: env.SIBS_API_URL || "",
-        clientId: env.SIBS_CLIENT_ID || "",
-        clientSecret: env.SIBS_CLIENT_SECRET || "",
-        redirectUri: env.SIBS_REDIRECT_URI || "",
+        baseUrl: isDevelopment
+          ? "https://sandbox.sibs.pt/api" // Default sandbox URL
+          : "https://api.sibs.pt/api", // Default production URL
+        clientId: env.SIBS_CLIENT_ID ?? "",
+        clientSecret: env.SIBS_CLIENT_SECRET ?? "",
+        redirectUri: env.SIBS_REDIRECT_URI ?? "",
         certificate,
         certificateKey,
         isSandbox: isDevelopment,
@@ -56,9 +58,9 @@ export function getBankingProvider(providerName: string): BankingProvider {
 
     case "truelayer":
       return new TrueLayerProvider({
-        clientId: env.TRUELAYER_CLIENT_ID || "",
-        clientSecret: env.TRUELAYER_CLIENT_SECRET || "",
-        redirectUri: env.TRUELAYER_REDIRECT_URI || "",
+        clientId: env.TRUELAYER_CLIENT_ID ?? "",
+        clientSecret: env.TRUELAYER_CLIENT_SECRET ?? "",
+        redirectUri: env.TRUELAYER_REDIRECT_URI ?? "",
         isSandbox: isDevelopment,
       });
 
