@@ -11,7 +11,7 @@ export default async function SignIn() {
 
   const providers = await getProviders();
 
-  console.log(providers)
+  console.log(providers);
 
   if (session?.user) {
     redirect("/dashboard");
@@ -22,7 +22,7 @@ export default async function SignIn() {
       <div className="col-span-1 bg-primary">
         <div className="flex w-full  items-center gap-3 p-6">
           <Boxes className="h-12 w-12 " />
-          <h1 className=" text-3xl font-semibold  ">Ledgerly</h1>
+          <h1 className=" text-3xl font-semibold  ">Kleero</h1>
         </div>
       </div>
       <div className="col-span-1 flex  flex-col items-center justify-center">

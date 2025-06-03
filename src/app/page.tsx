@@ -31,7 +31,7 @@ export default async function Home() {
           <div className="flex items-center space-x-2">
             <DollarSign className="h-8 w-8 text-blue-600" />
             <span className="text-2xl font-bold text-slate-900 dark:text-white">
-              Ledgerly
+              Kleero
             </span>
           </div>
           <div className="flex items-center space-x-4">
@@ -272,7 +272,7 @@ export default async function Home() {
           </h2>
           <p className="mb-8 text-xl opacity-90">
             Join thousands of users who have taken control of their finances
-            with Ledgerly.
+            with Kleero.
           </p>
           {!session ? (
             <Button
@@ -309,7 +309,7 @@ export default async function Home() {
             <div>
               <div className="mb-4 flex items-center space-x-2">
                 <DollarSign className="h-6 w-6 text-blue-400" />
-                <span className="text-xl font-bold">Ledgerly</span>
+                <span className="text-xl font-bold">Kleero</span>
               </div>
               <p className="text-slate-400">
                 Revolutionizing financial management with AI-driven insights and
@@ -345,7 +345,7 @@ export default async function Home() {
             </div>
           </div>
           <div className="mt-8 border-t border-slate-800 pt-8 text-center text-slate-400">
-            <p>&copy; 2024 Ledgerly. All rights reserved.</p>
+            <p>&copy; 2024 Kleero. All rights reserved.</p>
           </div>
         </div>
       </footer>

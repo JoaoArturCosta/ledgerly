@@ -1,9 +1,9 @@
 -- Create banking tables for Open Banking integration
 
 -- Bank connections table
-CREATE TABLE IF NOT EXISTS "ledgerly_bank_connections" (
+CREATE TABLE IF NOT EXISTS "kleero_bank_connections" (
   "id" VARCHAR(255) PRIMARY KEY,
-  "user_id" VARCHAR(255) NOT NULL REFERENCES "ledgerly_user"("id") ON DELETE CASCADE,
+  "user_id" VARCHAR(255) NOT NULL REFERENCES "kleero_user"("id") ON DELETE CASCADE,
   "provider_name" VARCHAR(50) NOT NULL,
   "provider_account_id" VARCHAR(255) NOT NULL,
   "access_token" TEXT NOT NULL,
@@ -17,9 +17,9 @@ CREATE TABLE IF NOT EXISTS "ledgerly_bank_connections" (
 );
 
 -- Bank accounts table
-CREATE TABLE IF NOT EXISTS "ledgerly_bank_accounts" (
+CREATE TABLE IF NOT EXISTS "kleero_bank_accounts" (
   "id" VARCHAR(255) PRIMARY KEY,
-  "connection_id" VARCHAR(255) NOT NULL REFERENCES "ledgerly_bank_connections"("id") ON DELETE CASCADE,
+  "connection_id" VARCHAR(255) NOT NULL REFERENCES "kleero_bank_connections"("id") ON DELETE CASCADE,
   "account_name" VARCHAR(255) NOT NULL,
   "account_type" VARCHAR(50),
   "account_number" VARCHAR(50),
@@ -29,9 +29,9 @@ CREATE TABLE IF NOT EXISTS "ledgerly_bank_accounts" (
 );
 
 -- Bank transactions table
-CREATE TABLE IF NOT EXISTS "ledgerly_bank_transactions" (
+CREATE TABLE IF NOT EXISTS "kleero_bank_transactions" (
   "id" VARCHAR(255) PRIMARY KEY,
-  "account_id" VARCHAR(255) NOT NULL REFERENCES "ledgerly_bank_accounts"("id") ON DELETE CASCADE,
+  "account_id" VARCHAR(255) NOT NULL REFERENCES "kleero_bank_accounts"("id") ON DELETE CASCADE,
   "amount" DECIMAL(10, 2) NOT NULL,
   "date" TIMESTAMP NOT NULL,
   "description" VARCHAR(255),
@@ -39,12 +39,12 @@ CREATE TABLE IF NOT EXISTS "ledgerly_bank_transactions" (
   "category" VARCHAR(100),
   "pending" BOOLEAN DEFAULT FALSE,
   "synced" BOOLEAN DEFAULT FALSE,
-  "expense_id" INTEGER REFERENCES "ledgerly_expense"("id")
+  "expense_id" INTEGER REFERENCES "kleero_expense"("id")
 );
 
 -- Create indexes for better performance
-CREATE INDEX IF NOT EXISTS "bank_connections_user_id_idx" ON "ledgerly_bank_connections"("user_id");
-CREATE INDEX IF NOT EXISTS "bank_accounts_connection_id_idx" ON "ledgerly_bank_accounts"("connection_id");
-CREATE INDEX IF NOT EXISTS "bank_transactions_account_id_idx" ON "ledgerly_bank_transactions"("account_id");
-CREATE INDEX IF NOT EXISTS "bank_transactions_date_idx" ON "ledgerly_bank_transactions"("date");
-CREATE INDEX IF NOT EXISTS "bank_transactions_expense_id_idx" ON "ledgerly_bank_transactions"("expense_id"); 
+CREATE INDEX IF NOT EXISTS "bank_connections_user_id_idx" ON "kleero_bank_connections"("user_id");
+CREATE INDEX IF NOT EXISTS "bank_accounts_connection_id_idx" ON "kleero_bank_accounts"("connection_id");
+CREATE INDEX IF NOT EXISTS "bank_transactions_account_id_idx" ON "kleero_bank_transactions"("account_id");
+CREATE INDEX IF NOT EXISTS "bank_transactions_date_idx" ON "kleero_bank_transactions"("date");
+CREATE INDEX IF NOT EXISTS "bank_transactions_expense_id_idx" ON "kleero_bank_transactions"("expense_id"); 

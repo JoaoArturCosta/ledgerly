@@ -16,7 +16,7 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: "Ledgerly",
+  title: "Kleero",
   description: "Your personal Financial manager",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };

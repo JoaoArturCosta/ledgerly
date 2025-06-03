@@ -32,7 +32,7 @@ const SideNav = ({ isCollapsed, setOpen, className }: SideNavProps) => {
         )}
       >
         <Boxes className="h-8 w-8" />
-        {!isCollapsed && <h1 className=" text-lg font-semibold ">Ledgerly</h1>}
+        {!isCollapsed && <h1 className=" text-lg font-semibold ">Kleero</h1>}
       </Link>
       {NavItems.map((item) => (
         <HoverCard key={item.title}>

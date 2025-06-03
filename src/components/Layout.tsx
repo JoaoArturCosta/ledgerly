@@ -34,7 +34,7 @@ const Layout = ({
   return (
     <main className="flex h-screen w-screen items-center justify-center">
       <ResizablePanelGroup
-        autoSaveId="ledgerly-side-bar"
+        autoSaveId="Kleero-side-bar"
         direction="horizontal"
         className="h-full w-full"
       >

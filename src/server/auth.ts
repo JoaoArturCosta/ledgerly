@@ -50,14 +50,26 @@ export const authOptions: NextAuthOptions = {
   },
   adapter: DrizzleAdapter(db, pgTable) as Adapter,
   providers: [
-    GoogleProvider({
-      clientId: env.GOOGLE_CLIENT_ID,
-      clientSecret: env.GOOGLE_CLIENT_SECRET,
-    }),
-    DiscordProvider({
-      clientId: env.DISCORD_CLIENT_ID,
-      clientSecret: env.DISCORD_CLIENT_SECRET,
-    }),
+    // Only add Google provider if credentials are available
+    ...(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
+      ? [
+          GoogleProvider({
+            clientId: env.GOOGLE_CLIENT_ID,
+            clientSecret: env.GOOGLE_CLIENT_SECRET,
+          }),
+        ]
+      : []),
+
+    // Only add Discord provider if credentials are available
+    ...(env.DISCORD_CLIENT_ID && env.DISCORD_CLIENT_SECRET
+      ? [
+          DiscordProvider({
+            clientId: env.DISCORD_CLIENT_ID,
+            clientSecret: env.DISCORD_CLIENT_SECRET,
+          }),
+        ]
+      : []),
+
     /**
      * ...add more providers here.
      *
@@ -69,7 +81,7 @@ export const authOptions: NextAuthOptions = {
      */
   ],
   pages: {
-    // signIn: "/auth/signin",
+    signIn: "/auth/signin",
     // signOut: "/auth/signout",
     // error: "/auth/error",
     // verifyRequest: "/auth/verify-request",

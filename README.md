@@ -1,9 +1,9 @@
 <a href="">
-  <h1 align="center">Ledgerly: Revolutionizing Financial Management</h1>
+  <h1 align="center">Kleero: Revolutionizing Financial Management</h1>
 </a>
 
 <p align="center">
-  Empower your financial management with Ledgerly - AI-driven insights at your fingertips. Optimize your finances effortlessly.
+  Empower your financial management with Kleero - AI-driven insights at your fingertips. Optimize your finances effortlessly.
 </p>
 
 <p align="center">
@@ -17,15 +17,15 @@
 
 ## Introduction
 
-Welcome to Ledgerly, where we're ushering in a new era of financial management. Leveraging cutting-edge AI, Ledgerly redefines how you track, analyze, and optimize your finances, ensuring smarter, more secure financial decisions.
+Welcome to Kleero, where we're ushering in a new era of financial management. Leveraging cutting-edge AI, Kleero redefines how you track, analyze, and optimize your finances, ensuring smarter, more secure financial decisions.
 
-With Ledgerly, gain unparalleled insights into your spending habits and financial patterns, empowering you to budget better and experience more. Trusted by the world's most innovative companies, Ledgerly is here to revolutionize your financial management experience.
+With Kleero, gain unparalleled insights into your spending habits and financial patterns, empowering you to budget better and experience more. Trusted by the world's most innovative companies, Kleero is here to revolutionize your financial management experience.
 
 ## What we are using
 
 Lets goooo - Next.js 14, Drizzle ORM, Planetscale, Clerk, Resend, React Email, Shadcn/ui, and Stripe.
 <br/>
-All seamlessly integrated with the Ledgerly to accelerate the development.
+All seamlessly integrated with the Kleero to accelerate the development.
 
 ## Directory Structure
 
@@ -35,8 +35,8 @@ The monorepo is split between `apps` and `packages` directories.
     ├── apps                         # Its app workspace which contains
     │    ├── www                     # Nextjs app which is deployed in Vercel
     │    └── ...
-    ├── tooling                      # are the shared configuration that are used by the apps and packages (e.g. `@ledgerly/eslint-config`)
-    ├── packages                     # are the shared packages that are used by the apps (e.g. `@ledgerly/components`)
+    ├── tooling                      # are the shared configuration that are used by the apps and packages (e.g. `@Kleero/eslint-config`)
+    ├── packages                     # are the shared packages that are used by the apps (e.g. `@Kleero/components`)
     ├── docker-compose.yml
     ├── LICENSE
     └── README.md
@@ -49,7 +49,7 @@ The monorepo is split between `apps` and `packages` directories.
 Clone & create this repo locally with the following command:
 
 ```bash
-git clone https://github.com/JoaoArturCosta/ledgerly.git
+git clone https://github.com/JoaoArturCosta/Kleero.git
 ```
 
 1. Install dependencies using yarn:
@@ -139,7 +139,7 @@ The default setting for `TEST_EMAIL_ADDRESS` is `delivered@resend.dev` but you h
 - [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) – Optimize custom fonts and remove external network requests for improved performance
 - [`ImageResponse`](https://nextjs.org/docs/app/api-reference/functions/image-response) – Generate dynamic Open Graph images at the edge
 
-# Ledgerly
+# Kleero
 
 Your comprehensive financial management platform. Track expenses, manage income, monitor savings, and gain insights into your financial health with powerful analytics and intuitive design.
 
@@ -157,7 +157,7 @@ Your comprehensive financial management platform. Track expenses, manage income,
 
 ```bash
 git clone <repository-url>
-cd ledgerly
+cd Kleero
 ```
 
 2. Install dependencies
@@ -188,7 +188,7 @@ npm run dev
 
 ## 🔐 Authentication Setup
 
-Ledgerly uses NextAuth.js with OAuth providers for secure authentication.
+Kleero uses NextAuth.js with OAuth providers for secure authentication.
 
 ### Environment Setup
 
@@ -196,7 +196,7 @@ Create a `.env.local` file with the following variables:
 
 ```env
 # Database
-DATABASE_URL="postgresql://username:password@localhost:5432/ledgerly"
+DATABASE_URL="postgresql://username:password@localhost:5432/Kleero"
 
 # NextAuth.js
 NEXTAUTH_SECRET="your-secret-key-here"

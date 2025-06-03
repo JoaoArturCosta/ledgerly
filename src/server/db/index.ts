@@ -51,7 +51,7 @@ async function createSchemaFromDefinitions() {
 
     // Create essential tables directly
     const createTablesSQL = `
-      CREATE TABLE IF NOT EXISTS "ledgerly_user" (
+      CREATE TABLE IF NOT EXISTS "kleero_user" (
         "id" VARCHAR(255) NOT NULL PRIMARY KEY,
         "name" VARCHAR(255),
         "email" VARCHAR(255) NOT NULL,
@@ -59,7 +59,7 @@ async function createSchemaFromDefinitions() {
         "image" VARCHAR(255)
       );
       
-      CREATE TABLE IF NOT EXISTS "ledgerly_expense" (
+      CREATE TABLE IF NOT EXISTS "kleero_expense" (
         "id" SERIAL PRIMARY KEY,
         "name" VARCHAR(256),
         "amount" INTEGER NOT NULL,
@@ -126,7 +126,7 @@ async function runSqlMigrations() {
 
   try {
     // First check if any base tables exist
-    const userTableExists = await tableExists("ledgerly_user");
+    const userTableExists = await tableExists("kleero_user");
 
     // If base tables don't exist, initialize the database schema from definitions
     if (!userTableExists) {

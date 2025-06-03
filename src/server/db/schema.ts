@@ -19,7 +19,7 @@ import { type AdapterAccount } from "next-auth/adapters";
  *
  * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
  */
-export const pgTable = pgTableCreator((name) => `ledgerly_${name}`);
+export const pgTable = pgTableCreator((name) => `kleero_${name}`);
 
 export const incomeCategories = pgTable("incomeCategory", {
   id: serial("id").primaryKey(),

@@ -17,5 +17,5 @@ export default {
     database: env.DATABASE_URL.split("/").pop()?.split("?")[0] ?? "postgres",
     ssl: env.DATABASE_URL.includes("ssl="),
   },
-  tablesFilter: ["ledgerly_*"],
+  tablesFilter: ["Kleero_*"],
 } satisfies Config;
