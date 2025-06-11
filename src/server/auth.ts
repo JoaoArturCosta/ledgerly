@@ -10,7 +10,9 @@ import GoogleProvider from "next-auth/providers/google";
 
 import { env } from "@/env";
 import { db } from "@/server/db";
-import { pgTable } from "@/server/db/schema";
+import { pgTable, users } from "@/server/db/schema";
+import { eq } from "drizzle-orm";
+import { PLAN_LIMITS, type SubscriptionPlan } from "@/lib/stripe-config";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -22,15 +24,20 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
-      // ...other properties
-      // role: UserRole;
+      subscription: {
+        plan: SubscriptionPlan;
+        status: string;
+        stripeCustomerId?: string;
+        limits: typeof PLAN_LIMITS.free;
+      };
     } & DefaultSession["user"];
   }
 
-  // interface User {
-  //   // ...other properties
-  //   // role: UserRole;
-  // }
+  interface User {
+    subscriptionPlan?: string;
+    subscriptionStatus?: string;
+    stripeCustomerId?: string;
+  }
 }
 
 /**
@@ -40,13 +47,30 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-      },
-    }),
+    session: async ({ session, user }) => {
+      // Get user subscription data from database
+      const userWithSubscription = await db.query.users.findFirst({
+        where: eq(users.id, user.id),
+      });
+
+      const plan = (userWithSubscription?.subscriptionPlan ??
+        "free") as SubscriptionPlan;
+      const status = userWithSubscription?.subscriptionStatus ?? "active";
+
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: user.id,
+          subscription: {
+            plan,
+            status,
+            stripeCustomerId: userWithSubscription?.stripeCustomerId,
+            limits: PLAN_LIMITS[plan],
+          },
+        },
+      };
+    },
   },
   adapter: DrizzleAdapter(db, pgTable) as Adapter,
   providers: [

@@ -43,6 +43,10 @@ export const env = createEnv({
     TRUELAYER_CLIENT_ID: z.string().optional(),
     TRUELAYER_CLIENT_SECRET: z.string().optional(),
     TRUELAYER_REDIRECT_URI: z.string().optional(),
+
+    // Stripe configuration
+    STRIPE_SECRET_KEY: z.string().optional(),
+    STRIPE_WEBHOOK_SECRET: z.string().optional(),
   },
 
   /**
@@ -52,6 +56,7 @@ export const env = createEnv({
    */
   client: {
     // NEXT_PUBLIC_CLIENTVAR: z.string().min(1),
+    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().optional(),
   },
 
   /**
@@ -84,6 +89,12 @@ export const env = createEnv({
     TRUELAYER_CLIENT_ID: process.env.TRUELAYER_CLIENT_ID,
     TRUELAYER_CLIENT_SECRET: process.env.TRUELAYER_CLIENT_SECRET,
     TRUELAYER_REDIRECT_URI: process.env.TRUELAYER_REDIRECT_URI,
+
+    // Stripe configuration
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+    STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
+    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:
+      process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

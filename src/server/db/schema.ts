@@ -209,13 +209,47 @@ export const users = pgTable("user", {
     mode: "date",
   }),
   image: varchar("image", { length: 255 }),
+  // Subscription fields
+  subscriptionPlan: varchar("subscription_plan", { length: 20 }).default(
+    "free",
+  ),
+  subscriptionStatus: varchar("subscription_status", { length: 20 }).default(
+    "active",
+  ),
+  stripeCustomerId: varchar("stripe_customer_id", { length: 255 }),
 });
 
 export type User = InferSelectModel<typeof users>;
 
-export const usersRelations = relations(users, ({ many }) => ({
+export const subscriptions = pgTable("subscription", {
+  id: varchar("id", { length: 255 }).notNull().primaryKey(),
+  userId: varchar("user_id", { length: 255 })
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  stripeSubscriptionId: varchar("stripe_subscription_id", { length: 255 }),
+  plan: varchar("plan", { length: 20 }).notNull(),
+  status: varchar("status", { length: 20 }).notNull(),
+  currentPeriodEnd: timestamp("current_period_end"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type Subscription = InferSelectModel<typeof subscriptions>;
+
+export const usersRelations = relations(users, ({ one, many }) => ({
   accounts: many(accounts),
   sessions: many(sessions),
+  subscription: one(subscriptions, {
+    fields: [users.id],
+    references: [subscriptions.userId],
+  }),
+}));
+
+export const subscriptionsRelations = relations(subscriptions, ({ one }) => ({
+  user: one(users, {
+    fields: [subscriptions.userId],
+    references: [users.id],
+  }),
 }));
 
 export const accounts = pgTable(

@@ -88,8 +88,13 @@ export default async function Home() {
                 </Link>
               </Button>
             )}
-            <Button size="lg" variant="outline" className="px-8 py-6 text-lg">
-              Watch Demo
+            <Button
+              size="lg"
+              variant="outline"
+              asChild
+              className="px-8 py-6 text-lg"
+            >
+              <Link href="/pricing">View Pricing</Link>
             </Button>
           </div>
         </div>
@@ -331,8 +336,13 @@ export default async function Home() {
                 </Link>
               </Button>
             )}
-            <Button size="lg" variant="secondary" className="px-8 py-6 text-lg">
-              Watch Demo
+            <Button
+              size="lg"
+              variant="secondary"
+              asChild
+              className="px-8 py-6 text-lg"
+            >
+              <Link href="/pricing">View Pricing</Link>
             </Button>
           </div>
         </div>

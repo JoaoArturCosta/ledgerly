@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 
 import {
   createTRPCRouter,
@@ -7,7 +8,8 @@ import {
 } from "@/server/api/trpc";
 import { expenses, savings } from "@/server/db/schema";
 import { format } from "date-fns";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
+import { canUseFeature, type SubscriptionPlan } from "@/lib/stripe-config";
 
 export const expenseRouter = createTRPCRouter({
   getAllCategories: publicProcedure.query(({ ctx }) => {
@@ -32,6 +34,27 @@ export const expenseRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      // Check subscription limits for transactions
+      const userPlan = (ctx.session.user.subscription?.plan ??
+        "free") as SubscriptionPlan;
+
+      // Get current transaction count
+      const transactionCount = await ctx.db
+        .select({ count: sql<number>`count(*)` })
+        .from(expenses)
+        .where(eq(expenses.createdById, ctx.session.user.id));
+
+      const currentCount = transactionCount[0]?.count ?? 0;
+
+      // Check if user can create another transaction
+      if (!canUseFeature(userPlan, "transactions", currentCount + 1)) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message:
+            "Transaction limit reached. Please upgrade your plan to add more transactions.",
+        });
+      }
+
       const expenseData = {
         amount: input.amount,
         description: input.description,
