@@ -12,7 +12,6 @@ import {
   ArrowRight,
   BarChart3,
   CreditCard,
-  DollarSign,
   Shield,
   TrendingUp,
   Wallet,
@@ -20,6 +19,7 @@ import {
   Brain,
   CheckCircle,
 } from "lucide-react";
+import { StatusOverlay } from "@/components/ui/status-overlay";
 
 export default async function Home() {
   const session = await getServerAuthSession();
@@ -59,18 +59,19 @@ export default async function Home() {
       <section className="container mx-auto px-4 py-20 text-center">
         <div className="mx-auto max-w-4xl">
           <h1 className="mb-6 text-5xl font-bold text-slate-900 dark:text-white md:text-7xl">
-            Revolutionizing
+            Take Control of Your
             <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               {" "}
               Financial{" "}
             </span>
-            Management
+            Future
           </h1>
           <p className="mb-8 text-xl leading-relaxed text-slate-600 dark:text-slate-300 md:text-2xl">
-            Empower your financial journey with AI-driven insights,
-            comprehensive tracking, and intelligent budgeting. Take control of
-            your finances like never before.
+            Kleero unifies all your accounts, tracks your expenses, and uses AI
+            to optimize your wealth — in real-time. <br />
+            <b>Smarter insights. Better decisions. More peace of mind.</b>
           </p>
+
           <div className="flex flex-col justify-center gap-4 sm:flex-row">
             {!session ? (
               <Button size="lg" asChild className="px-8 py-6 text-lg">
@@ -98,11 +99,11 @@ export default async function Home() {
       <section className="container mx-auto px-4 py-20">
         <div className="mb-16 text-center">
           <h2 className="mb-4 text-4xl font-bold text-slate-900 dark:text-white">
-            Everything You Need for Financial Success
+            Everything You Need to Master Your Money
           </h2>
           <p className="mx-auto max-w-2xl text-xl text-slate-600 dark:text-slate-300">
-            Comprehensive tools designed to give you complete visibility and
-            control over your financial life.
+            From budgeting and forecasting to personalized insights — Kleero
+            gives you the tools to grow, protect, and manage your wealth.
           </p>
         </div>
 
@@ -112,10 +113,10 @@ export default async function Home() {
               <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 transition-transform group-hover:scale-110 dark:bg-blue-900">
                 <BarChart3 className="h-6 w-6 text-blue-600" />
               </div>
-              <CardTitle>Advanced Analytics</CardTitle>
+              <CardTitle>AI-Powered Analytics</CardTitle>
               <CardDescription>
-                Get deep insights into your spending patterns with interactive
-                charts and AI-powered analysis.
+                Visualize your financial trends and get predictive insights to
+                make smarter decisions.
               </CardDescription>
             </CardHeader>
           </Card>
@@ -125,10 +126,10 @@ export default async function Home() {
               <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-green-100 transition-transform group-hover:scale-110 dark:bg-green-900">
                 <Wallet className="h-6 w-6 text-green-600" />
               </div>
-              <CardTitle>Expense Tracking</CardTitle>
+              <CardTitle>Intelligent Expense Tracking</CardTitle>
               <CardDescription>
-                Categorize and track every expense with smart categorization and
-                recurring transaction detection.
+                Automatically categorize transactions, spot patterns, and detect
+                recurring payments effortlessly.
               </CardDescription>
             </CardHeader>
           </Card>
@@ -138,10 +139,10 @@ export default async function Home() {
               <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100 transition-transform group-hover:scale-110 dark:bg-purple-900">
                 <TrendingUp className="h-6 w-6 text-purple-600" />
               </div>
-              <CardTitle>Income Management</CardTitle>
+              <CardTitle>Income Stream Management</CardTitle>
               <CardDescription>
-                Track multiple income sources, recurring payments, and monitor
-                your earning trends over time.
+                Monitor salaries, side hustles, and passive income in one place
+                — with support for recurring inflows.
               </CardDescription>
             </CardHeader>
           </Card>
@@ -151,75 +152,107 @@ export default async function Home() {
               <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-orange-100 transition-transform group-hover:scale-110 dark:bg-orange-900">
                 <Target className="h-6 w-6 text-orange-600" />
               </div>
-              <CardTitle>Savings Goals</CardTitle>
+              <CardTitle>Smart Savings Goals</CardTitle>
               <CardDescription>
-                Set and track savings goals with progress monitoring and smart
-                allocation recommendations.
+                Set goals, track progress, and receive smart allocation
+                suggestions to help you get there faster.
               </CardDescription>
             </CardHeader>
           </Card>
 
           <Card className="group relative overflow-hidden transition-all duration-300 hover:shadow-xl">
+            <StatusOverlay status="coming-soon" />
             <CardHeader>
               <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-cyan-100 transition-transform group-hover:scale-110 dark:bg-cyan-900">
                 <CreditCard className="h-6 w-6 text-cyan-600" />
               </div>
-              <CardTitle>Banking Integration</CardTitle>
+              <CardTitle>Real-Time Banking Sync</CardTitle>
               <CardDescription>
-                Connect your bank accounts for automatic transaction syncing and
-                real-time balance updates.
+                Connect multiple accounts and see a unified dashboard of your
+                real-time balances and net worth.
               </CardDescription>
             </CardHeader>
           </Card>
 
           <Card className="group relative overflow-hidden transition-all duration-300 hover:shadow-xl">
+            <StatusOverlay status="coming-soon" />
             <CardHeader>
               <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-red-100 transition-transform group-hover:scale-110 dark:bg-red-900">
                 <Brain className="h-6 w-6 text-red-600" />
               </div>
-              <CardTitle>AI Insights</CardTitle>
+              <CardTitle>Personalized AI Insights</CardTitle>
               <CardDescription>
-                Receive personalized financial advice and spending optimization
-                suggestions powered by AI.
+                Get actionable recommendations to reduce waste, grow savings,
+                and optimize spending — powered by machine learning.
               </CardDescription>
             </CardHeader>
           </Card>
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="bg-white/50 backdrop-blur-sm dark:bg-slate-800/50">
-        <div className="container mx-auto px-4 py-20">
-          <div className="grid grid-cols-2 gap-8 text-center md:grid-cols-4">
-            <div>
-              <div className="mb-2 text-4xl font-bold text-slate-900 dark:text-white">
-                10K+
-              </div>
-              <div className="text-slate-600 dark:text-slate-300">
-                Happy Users
-              </div>
+      {/* Why Users Are Joining Section */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-purple-900 to-blue-800 text-white">
+        {/* Background decorative elements */}
+        <div className="absolute inset-0">
+          <div className="absolute right-0 top-0 h-96 w-96 rounded-full bg-blue-600/10 blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 h-64 w-64 rounded-full bg-purple-600/10 blur-3xl"></div>
+        </div>
+
+        <div className="container relative mx-auto px-4 py-20">
+          <div className="mx-auto max-w-4xl text-center">
+            <p className="mb-4 text-lg font-medium text-blue-400">
+              Global Scale
+            </p>
+            <h2 className="mb-6 text-4xl font-bold md:text-5xl">
+              Why Users Are Joining Kleero
+            </h2>
+            <p className="mb-16 text-xl text-slate-300">
+              We&apos;re just getting started — and building Kleero with a clear
+              mission:
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+            <div className="group border-l-2 border-purple-400 pl-6">
+              <div className="mb-4 text-3xl font-bold">💼</div>
+              <h3 className="mb-3 text-xl font-bold">
+                Designed for Modern Money Management
+              </h3>
+              <p className="text-sm text-slate-300">
+                Built to simplify your financial life across multiple accounts,
+                banks, and income sources.
+              </p>
             </div>
-            <div>
-              <div className="mb-2 text-4xl font-bold text-slate-900 dark:text-white">
-                $2M+
-              </div>
-              <div className="text-slate-600 dark:text-slate-300">
-                Money Managed
-              </div>
+
+            <div className="group border-l-2 border-purple-400 pl-6">
+              <div className="mb-4 text-3xl font-bold">🤖</div>
+              <h3 className="mb-3 text-xl font-bold">
+                Powered by AI, Guided by You
+              </h3>
+              <p className="text-sm text-slate-300">
+                Smart insights that adapt to your goals, spending, and lifestyle
+                — not the other way around.
+              </p>
             </div>
-            <div>
-              <div className="mb-2 text-4xl font-bold text-slate-900 dark:text-white">
-                95%
-              </div>
-              <div className="text-slate-600 dark:text-slate-300">
-                Satisfaction Rate
-              </div>
+
+            <div className="group border-l-2 border-purple-400 pl-6">
+              <div className="mb-4 text-3xl font-bold">🔒</div>
+              <h3 className="mb-3 text-xl font-bold">Secure From Day One</h3>
+              <p className="text-sm text-slate-300">
+                Bank-level encryption, GDPR compliance, and OAuth integrations
+                ensure your data is always safe.
+              </p>
             </div>
-            <div>
-              <div className="mb-2 text-4xl font-bold text-slate-900 dark:text-white">
-                24/7
-              </div>
-              <div className="text-slate-600 dark:text-slate-300">Support</div>
+
+            <div className="group border-l-2 border-purple-400 pl-6">
+              <div className="mb-4 text-3xl font-bold">🌍</div>
+              <h3 className="mb-3 text-xl font-bold">
+                Community-Driven Vision
+              </h3>
+              <p className="text-sm text-slate-300">
+                We&apos;re co-creating Kleero with real users — your feedback
+                helps shape the future of personal finance.
+              </p>
             </div>
           </div>
         </div>
@@ -230,12 +263,14 @@ export default async function Home() {
         <div className="mx-auto max-w-4xl text-center">
           <Shield className="mx-auto mb-6 h-16 w-16 text-blue-600" />
           <h2 className="mb-6 text-4xl font-bold text-slate-900 dark:text-white">
-            Bank-Level Security
+            Built for Trust
           </h2>
+          <h3 className="mb-6 text-2xl font-bold text-slate-900 dark:text-white">
+            Security you can count on
+          </h3>
           <p className="mb-8 text-xl text-slate-600 dark:text-slate-300">
-            Your financial data is protected with enterprise-grade security,
-            OAuth authentication, and encrypted data transmission. We never
-            store your banking credentials.
+            Your data is encrypted, your credentials are never stored, and your
+            privacy is our priority.
           </p>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             <div className="flex items-center justify-center space-x-2">
@@ -247,13 +282,13 @@ export default async function Home() {
             <div className="flex items-center justify-center space-x-2">
               <CheckCircle className="h-5 w-5 text-green-600" />
               <span className="text-slate-700 dark:text-slate-300">
-                OAuth 2.0 Authentication
+                OAuth 2.0 Secure Bank Integration
               </span>
             </div>
             <div className="flex items-center justify-center space-x-2">
               <CheckCircle className="h-5 w-5 text-green-600" />
               <span className="text-slate-700 dark:text-slate-300">
-                GDPR Compliant
+                100% GDPR Compliant
               </span>
             </div>
           </div>
@@ -264,37 +299,42 @@ export default async function Home() {
       <section className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
         <div className="container mx-auto px-4 py-20 text-center">
           <h2 className="mb-4 text-4xl font-bold">
-            Ready to Transform Your Financial Life?
+            Your Financial Clarity Starts Now
           </h2>
           <p className="mb-8 text-xl opacity-90">
-            Join thousands of users who have taken control of their finances
-            with Kleero.
+            Join thousands taking control of their finances with AI-powered
+            clarity and confidence.
           </p>
-          {!session ? (
-            <Button
-              size="lg"
-              variant="secondary"
-              asChild
-              className="px-8 py-6 text-lg"
-            >
-              <Link href="/api/auth/signin">
-                Start Your Journey
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
+          <div className="flex flex-col justify-center gap-4 sm:flex-row">
+            {!session ? (
+              <Button
+                size="lg"
+                variant="secondary"
+                asChild
+                className="px-8 py-6 text-lg"
+              >
+                <Link href="/api/auth/signin">
+                  Start Your Free Journey
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
+            ) : (
+              <Button
+                size="lg"
+                variant="secondary"
+                asChild
+                className="px-8 py-6 text-lg"
+              >
+                <Link href="/dashboard">
+                  Continue to Dashboard
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
+            )}
+            <Button size="lg" variant="secondary" className="px-8 py-6 text-lg">
+              Watch Demo
             </Button>
-          ) : (
-            <Button
-              size="lg"
-              variant="secondary"
-              asChild
-              className="px-8 py-6 text-lg"
-            >
-              <Link href="/dashboard">
-                Continue to Dashboard
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
-          )}
+          </div>
         </div>
       </section>
 
