@@ -88,6 +88,11 @@ export const defaultExpenseCategories: Omit<
     createdById: "system",
   },
   {
+    name: "Debt Payments",
+    iconFaName: "credit-card",
+    createdById: "system",
+  },
+  {
     name: "Other",
     iconFaName: "ellipsis-h",
     createdById: "system",
@@ -289,6 +294,50 @@ export const defaultExpenseSubcategories = [
     name: "Books",
     iconFaName: "book",
     expenseCategoryId: 9,
+    createdById: "system",
+  },
+
+  // Debt Payments subcategories
+  {
+    name: "Credit Card Payment",
+    iconFaName: "credit-card",
+    expenseCategoryId: 11,
+    createdById: "system",
+  },
+  {
+    name: "Personal Loan",
+    iconFaName: "handshake",
+    expenseCategoryId: 11,
+    createdById: "system",
+  },
+  {
+    name: "Student Loan",
+    iconFaName: "graduation-cap",
+    expenseCategoryId: 11,
+    createdById: "system",
+  },
+  {
+    name: "Car Loan",
+    iconFaName: "car",
+    expenseCategoryId: 11,
+    createdById: "system",
+  },
+  {
+    name: "Mortgage Payment",
+    iconFaName: "home",
+    expenseCategoryId: 11,
+    createdById: "system",
+  },
+  {
+    name: "Medical Debt",
+    iconFaName: "user-md",
+    expenseCategoryId: 11,
+    createdById: "system",
+  },
+  {
+    name: "Other Debt",
+    iconFaName: "money-bill-wave",
+    expenseCategoryId: 11,
     createdById: "system",
   },
 
