@@ -116,13 +116,18 @@ export default function SavingsForm({
                   <Input
                     id="finalAmount"
                     type="number"
+                    step="0.01"
                     placeholder="Enter your goal amount"
                     value={
-                      !field.value || isNaN(field.value) ? "" : field.value
+                      field.value === undefined ||
+                      !field.value ||
+                      isNaN(field.value)
+                        ? ""
+                        : field.value
                     }
                     onChange={(e) => {
                       const value = e.target.valueAsNumber;
-                      field.onChange(isNaN(value) ? 0 : value);
+                      field.onChange(isNaN(value) ? undefined : value);
                     }}
                   />
                 </FormControl>
@@ -147,11 +152,16 @@ export default function SavingsForm({
                 <Input
                   id="startingAmount"
                   type="number"
+                  step="0.01"
                   placeholder="Enter starting amount"
-                  value={isNaN(field.value) ? "" : field.value}
+                  value={
+                    field.value === undefined || isNaN(field.value)
+                      ? ""
+                      : field.value
+                  }
                   onChange={(e) => {
                     const value = e.target.valueAsNumber;
-                    field.onChange(isNaN(value) ? 0 : value);
+                    field.onChange(isNaN(value) ? undefined : value);
                   }}
                 />
               </FormControl>

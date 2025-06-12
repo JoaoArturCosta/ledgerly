@@ -280,10 +280,23 @@ export default function ExpensesForm({
                 <Input
                   id="amount"
                   type="number"
-                  value={isNaN(field.value) ? "" : field.value}
+                  step="0.01"
+                  value={
+                    field.value === undefined ||
+                    field.value === null ||
+                    isNaN(field.value) ||
+                    field.value === 0
+                      ? ""
+                      : field.value
+                  }
                   onChange={(e) => {
-                    const value = e.target.valueAsNumber;
-                    field.onChange(isNaN(value) ? 0 : value);
+                    const value = e.target.value;
+                    if (value === "") {
+                      field.onChange(undefined);
+                    } else {
+                      const numValue = parseFloat(value);
+                      field.onChange(isNaN(numValue) ? undefined : numValue);
+                    }
                   }}
                 />
               </FormControl>

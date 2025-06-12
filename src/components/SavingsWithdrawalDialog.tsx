@@ -40,7 +40,6 @@ export function SavingsWithdrawalDialog({
   const form = useForm<TWithdrawalValidator>({
     resolver: zodResolver(WithdrawalValidator),
     defaultValues: {
-      amount: 0,
       description: "",
       savingId: relatedSaving.id.toString(),
     },
@@ -53,7 +52,10 @@ export function SavingsWithdrawalDialog({
         description: `Created ${savingWithdrawal?.description}.`,
       });
       router.refresh();
-      form.reset();
+      form.reset({
+        description: "",
+        savingId: relatedSaving.id.toString(),
+      });
     },
     onError: () => {
       toast({

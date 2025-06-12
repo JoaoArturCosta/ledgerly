@@ -93,7 +93,6 @@ export function ExpensesDialog({
   const form = useForm<TExpenseValidator>({
     resolver: zodResolver(ExpenseValidator),
     defaultValues: {
-      amount: 0,
       description: "",
       expenseCategoryId: "", // We'll set this in the useEffect
       expenseSubCategoryId: "",
@@ -157,7 +156,14 @@ export function ExpensesDialog({
         description: `Added ${expenseSubCategory?.name} to your expenses.`,
       });
       router.refresh();
-      form.reset();
+      form.reset({
+        description: "",
+        expenseCategoryId: "",
+        expenseSubCategoryId: "",
+        recurring: false,
+        relatedDate: relatedDate,
+        relatedSavingId: relatedSavingId,
+      });
     },
     onError: () => {
       toast({

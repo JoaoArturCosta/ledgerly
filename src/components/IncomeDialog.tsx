@@ -54,7 +54,6 @@ export function IncomeDialog() {
   const form = useForm<TIncomeValidator>({
     resolver: zodResolver(IncomeValidator),
     defaultValues: {
-      amount: 0,
       incomeCategoryId: "",
       recurring: false,
       relatedDate: relatedDate,
@@ -73,7 +72,11 @@ export function IncomeDialog() {
         description: `Added ${incomeCategory?.name} to your income.`,
       });
       router.refresh();
-      form.reset();
+      form.reset({
+        incomeCategoryId: "",
+        recurring: false,
+        relatedDate: relatedDate,
+      });
     },
     onError: () => {
       toast({

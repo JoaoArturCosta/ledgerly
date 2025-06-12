@@ -40,10 +40,15 @@ export default function WithdrawalForm({
                 <Input
                   id="amount"
                   type="number"
-                  value={isNaN(field.value) ? "" : field.value}
+                  step="0.01"
+                  value={
+                    field.value === undefined || isNaN(field.value)
+                      ? ""
+                      : field.value
+                  }
                   onChange={(e) => {
                     const value = e.target.valueAsNumber;
-                    field.onChange(isNaN(value) ? 0 : value);
+                    field.onChange(isNaN(value) ? undefined : value);
                   }}
                 />
               </FormControl>

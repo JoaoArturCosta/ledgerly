@@ -323,7 +323,7 @@ export const savingsRouter = createTRPCRouter({
   createSavingWithdrawal: protectedProcedure
     .input(
       z.object({
-        amount: z.number().min(1),
+        amount: z.number().min(0.01),
         description: z.string().min(0),
         savingId: z.string().min(1),
       }),

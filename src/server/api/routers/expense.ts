@@ -23,7 +23,7 @@ export const expenseRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
       z.object({
-        amount: z.number().min(1),
+        amount: z.number().min(0.01),
         description: z.string().min(1),
         expenseCategoryId: z.string().min(1),
         expenseSubCategoryId: z.string().min(1),
@@ -328,7 +328,7 @@ export const expenseRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.number(),
-        amount: z.number().min(1),
+        amount: z.number().min(0.01),
         description: z.string().min(1),
         expenseCategoryId: z.string().min(1),
         expenseSubCategoryId: z.string().min(1),

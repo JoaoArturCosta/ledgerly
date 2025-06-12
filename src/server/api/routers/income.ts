@@ -17,7 +17,7 @@ export const incomeRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
       z.object({
-        amount: z.number().min(1),
+        amount: z.number().min(0.01),
         incomeCategoryId: z.string().min(1),
         recurring: z.boolean(),
         relatedDate: z.date(),
@@ -162,7 +162,7 @@ export const incomeRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.number().min(1),
-        amount: z.number().min(1),
+        amount: z.number().min(0.01),
         incomeCategoryId: z.string().min(1),
         recurring: z.boolean(),
         relatedDate: z.date(),

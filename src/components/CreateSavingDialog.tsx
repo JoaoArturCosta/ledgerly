@@ -36,7 +36,6 @@ export default function CreateSavingDialog({
     defaultValues: {
       name: "",
       finalAmount: undefined,
-      startingAmount: 0,
       savingsCategoryId: "",
       endDate: undefined,
     },
@@ -48,7 +47,12 @@ export default function CreateSavingDialog({
         description: `Created new ${savingsCategory?.name} savings.`,
       });
       router.refresh();
-      form.reset();
+      form.reset({
+        name: "",
+        finalAmount: undefined,
+        savingsCategoryId: "",
+        endDate: undefined,
+      });
       refetchSavingsList();
     },
     onError: () => {
