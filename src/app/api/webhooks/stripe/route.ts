@@ -79,11 +79,18 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
 
   // Map price IDs to plan names
   const planMapping: Record<string, string> = {
-    price_pro: "pro",
-    price_premium: "premium",
+    price_1RYljLFMvCeHJDJsBVpX9hZc: "pro",
+    price_1RYljqFMvCeHJDJsmi9BWJAi: "premium",
   };
 
   const plan = planMapping[priceId!] ?? "free";
+
+  console.log(`🔍 Processing subscription update:
+    Customer ID: ${customerId}
+    Price ID: ${priceId}
+    Mapped Plan: ${plan}
+    Subscription Status: ${subscription.status}
+  `);
 
   // Update user subscription in database
   await db

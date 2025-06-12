@@ -10,9 +10,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
+import { LogOut, CreditCard, Crown, Settings } from "lucide-react";
 import { UserAvatar } from "@/components/UserAvatar";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { api } from "@/trpc/react";
 
 type Props = {
   isCollapsed?: boolean;
@@ -20,6 +22,20 @@ type Props = {
 };
 
 export function UserNav({ isCollapsed, user }: Props) {
+  const { data: subscription } =
+    api.subscription.getCurrentSubscription.useQuery();
+  const createPortalSession = api.subscription.createPortalSession.useMutation({
+    onSuccess: (data) => {
+      if (data.portalUrl) {
+        window.location.href = data.portalUrl;
+      }
+    },
+  });
+
+  const handleManageBilling = () => {
+    createPortalSession.mutate();
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
@@ -55,6 +71,27 @@ export function UserNav({ isCollapsed, user }: Props) {
           </div>
         </div>
         <DropdownMenuSeparator />
+
+        {/* Subscription Section */}
+        <DropdownMenuItem asChild>
+          <Link href="/pricing" className="w-full cursor-pointer">
+            <Crown className="mr-2 h-4 w-4" aria-hidden="true" />
+            {subscription?.plan === "free" ? "Upgrade Plan" : "View Plans"}
+          </Link>
+        </DropdownMenuItem>
+
+        {subscription?.plan !== "free" && (
+          <DropdownMenuItem
+            onClick={handleManageBilling}
+            disabled={createPortalSession.isLoading}
+          >
+            <CreditCard className="mr-2 h-4 w-4" aria-hidden="true" />
+            {createPortalSession.isLoading ? "Loading..." : "Manage Billing"}
+          </DropdownMenuItem>
+        )}
+
+        <DropdownMenuSeparator />
+
         <DropdownMenuItem asChild>
           <Button
             variant="outline"
