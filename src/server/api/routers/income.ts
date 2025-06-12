@@ -25,7 +25,7 @@ export const incomeRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       await ctx.db.insert(incomes).values({
-        amount: input.amount,
+        amount: input.amount.toFixed(2),
         incomeCategoryId: parseInt(input.incomeCategoryId),
         isRecurring: input.recurring,
         relatedDate: input.relatedDate,
@@ -162,7 +162,7 @@ export const incomeRouter = createTRPCRouter({
       await ctx.db
         .update(incomes)
         .set({
-          amount: input.amount,
+          amount: input.amount.toFixed(2),
           incomeCategoryId: parseInt(input.incomeCategoryId),
           isRecurring: input.recurring,
           relatedDate: input.relatedDate,

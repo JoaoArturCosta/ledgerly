@@ -37,7 +37,7 @@ export type IncomeCategory = InferSelectModel<typeof incomeCategories>;
 export const incomes = pgTable("income", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 256 }),
-  amount: integer("amount").notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   incomeCategoryId: integer("incomeCategoryId").notNull(),
   isRecurring: boolean("isRecurring").notNull(),
   relatedDate: timestamp("relatedDate").notNull(),
@@ -98,7 +98,7 @@ export const expenseSubCategoriesRelations = relations(
 export const expenses = pgTable("expense", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 256 }),
-  amount: integer("amount").notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   description: text("description"),
   expenseCategoryId: integer("expenseCategoryId").notNull(),
   expenseSubCategoryId: integer("expenseSubCategoryId").notNull(),
@@ -147,7 +147,7 @@ export type SavingsCategory = InferSelectModel<typeof savingsCategories>;
 
 export const savingsWithdrawals = pgTable("savingsWithdrawal", {
   id: serial("id").primaryKey(),
-  amount: integer("amount").notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   description: text("description"),
   savingId: integer("savingId").notNull(),
   createdById: varchar("createdById", { length: 255 }).notNull(),
@@ -175,12 +175,21 @@ export const savingsWithdrawalsRelations = relations(
 export const savings = pgTable("saving", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 256 }),
-  startingAmount: integer("startingAmount").default(0),
-  finalAmount: integer("finalAmount").default(0),
+  startingAmount: decimal("startingAmount", {
+    precision: 10,
+    scale: 2,
+  }).default("0"),
+  finalAmount: decimal("finalAmount", { precision: 10, scale: 2 }).default("0"),
   savingsCategoryId: integer("savingsCategoryId").notNull(),
   enabled: boolean("enabled").notNull().default(true),
-  depositedAmount: integer("depositedAmount").default(0),
-  withdrawnAmount: integer("withdrawnAmount").default(0),
+  depositedAmount: decimal("depositedAmount", {
+    precision: 10,
+    scale: 2,
+  }).default("0"),
+  withdrawnAmount: decimal("withdrawnAmount", {
+    precision: 10,
+    scale: 2,
+  }).default("0"),
   endDate: timestamp("endDate"),
   createdById: varchar("createdById", { length: 255 }).notNull(),
   createdAt: timestamp("created_at")
