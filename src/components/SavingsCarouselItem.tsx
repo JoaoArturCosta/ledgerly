@@ -39,10 +39,10 @@ export default function SavingsCarouselItem({
                   <DynamicFaIcon name={saving.savingsCategory.iconFaName} />{" "}
                 </span>
                 <span className="flex gap-1 ">
-                  {saving.finalAmount! > 0 && (
+                  {Number(saving.finalAmount) > 0 && (
                     <span className="flex gap-1 text-muted-foreground">
                       <PiggyBank className="h-4 w-4" />
-                      {`$${saving.finalAmount?.toLocaleString()}`}
+                      {`$${Number(saving.finalAmount)?.toLocaleString()}`}
                     </span>
                   )}
                   <span className="sr-ony">
@@ -64,18 +64,22 @@ export default function SavingsCarouselItem({
                 <div
                   className={cn(
                     "flex justify-between gap-2 ",
-                    saving.finalAmount! <= 0 && "invisible",
+                    Number(saving.finalAmount) <= 0 && "invisible",
                   )}
                 >
                   <Progress
                     className="mt-2"
                     value={Math.round(
-                      (saving.savedAmount / saving.finalAmount!) * 100,
+                      (Number(saving.savedAmount) /
+                        Number(saving.finalAmount)) *
+                        100,
                     )}
                   />
                   <span className="text-muted-foreground">
                     {Math.round(
-                      (saving.savedAmount / saving.finalAmount!) * 100,
+                      (Number(saving.savedAmount) /
+                        Number(saving.finalAmount)) *
+                        100,
                     )}
                     %
                   </span>
