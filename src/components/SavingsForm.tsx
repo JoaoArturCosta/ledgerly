@@ -28,6 +28,7 @@ import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toTimezoneNeutralDate } from "@/lib/date-utils";
 
 interface SavingFormProps {
   form: UseFormReturn<TSavingsValidator>;
@@ -217,7 +218,14 @@ export default function SavingsForm({
                     <Calendar
                       mode="single"
                       selected={field.value}
-                      onSelect={field.onChange}
+                      onSelect={(date) => {
+                        if (date) {
+                          // Set to noon to avoid timezone issues
+                          field.onChange(toTimezoneNeutralDate(date));
+                        } else {
+                          field.onChange(date);
+                        }
+                      }}
                       disabled={(date) =>
                         date < new Date() || date < new Date("1900-01-01")
                       }

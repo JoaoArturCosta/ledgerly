@@ -32,11 +32,20 @@ export default async function Dashboard({ searchParams }: DashboardProps) {
   const relatedDate = useMemo(() => {
     if (searchParams.month) {
       const date = new Date(format(searchParams.month, "yyyy-MM-dd"));
-      return date;
+      // Set to noon to avoid timezone issues
+      return new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate(),
+        12,
+        0,
+        0,
+      );
     }
 
     const date = new Date();
-    return new Date(date.getFullYear(), date.getMonth(), 1);
+    // Set to noon to avoid timezone issues
+    return new Date(date.getFullYear(), date.getMonth(), 1, 12, 0, 0);
   }, [searchParams]);
 
   const savingsByMonth = await api.savings.getAllSavingsByMonth.query();

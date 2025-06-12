@@ -24,6 +24,10 @@ import {
   type TExpenseValidator,
 } from "@/lib/validators/ExpenseValidators";
 import ExpensesForm from "@/components/ExpensesForm";
+import {
+  createTimezoneNeutralDate,
+  getCurrentTimezoneNeutralDate,
+} from "@/lib/date-utils";
 
 interface ExpensesDialogProps {
   className?: string;
@@ -75,10 +79,15 @@ export function ExpensesDialog({
       // Parse the "MMMM/yyyy" format from the DatePicker (e.g., "July/2025")
       const monthParam = searchParams.get("month")!;
       const parsedDate = parse(monthParam, "MMMM/yyyy", new Date());
-      // Set to the first day of the month for consistency
-      return new Date(parsedDate.getFullYear(), parsedDate.getMonth(), 1);
+      // Set to the first day of the month at noon to avoid timezone issues
+      return createTimezoneNeutralDate(
+        parsedDate.getFullYear(),
+        parsedDate.getMonth(),
+        1,
+      );
     }
-    return new Date();
+    // Set current date to noon to avoid timezone issues
+    return getCurrentTimezoneNeutralDate();
   }, [searchParams]);
 
   const form = useForm<TExpenseValidator>({

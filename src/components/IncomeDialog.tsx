@@ -23,6 +23,10 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 import { format, parse } from "date-fns";
 import IncomeForm from "@/components/IncomeForm";
+import {
+  createTimezoneNeutralDate,
+  getCurrentTimezoneNeutralDate,
+} from "@/lib/date-utils";
 
 export function IncomeDialog() {
   const { toast } = useToast();
@@ -36,13 +40,16 @@ export function IncomeDialog() {
       // Parse the "MMMM/yyyy" format from the DatePicker (e.g., "July/2025")
       const monthParam = searchParams.get("month")!;
       const parsedDate = parse(monthParam, "MMMM/yyyy", new Date());
-      // Set to the first day of the month for consistency
-      return new Date(parsedDate.getFullYear(), parsedDate.getMonth(), 1);
+      // Set to the first day of the month at noon to avoid timezone issues
+      return createTimezoneNeutralDate(
+        parsedDate.getFullYear(),
+        parsedDate.getMonth(),
+        1,
+      );
     }
-    return new Date();
+    // Set current date to noon to avoid timezone issues
+    return getCurrentTimezoneNeutralDate();
   }, [searchParams]);
-
-  console.log(relatedDate);
 
   const form = useForm<TIncomeValidator>({
     resolver: zodResolver(IncomeValidator),

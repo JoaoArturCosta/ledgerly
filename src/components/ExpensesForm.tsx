@@ -30,6 +30,7 @@ import { Calendar } from "./ui/calendar";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import SelectSavings from "@/components/SelectSavings";
+import { toTimezoneNeutralDate } from "@/lib/date-utils";
 
 interface ExpensesFormProps {
   form: UseFormReturn<TExpenseValidator>;
@@ -354,7 +355,14 @@ export default function ExpensesForm({
                           <Calendar
                             mode="single"
                             selected={field.value}
-                            onSelect={field.onChange}
+                            onSelect={(date) => {
+                              if (date) {
+                                // Set to noon to avoid timezone issues
+                                field.onChange(toTimezoneNeutralDate(date));
+                              } else {
+                                field.onChange(date);
+                              }
+                            }}
                             disabled={(date) =>
                               date < new Date() || date < new Date("1900-01-01")
                             }

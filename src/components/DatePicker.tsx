@@ -4,6 +4,10 @@ import { CalendarIcon } from "@radix-ui/react-icons";
 import { addMonths, format, parse } from "date-fns";
 
 import { cn } from "@/lib/utils";
+import {
+  createTimezoneNeutralDate,
+  getCurrentMonthTimezoneNeutralDate,
+} from "@/lib/date-utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -23,9 +27,16 @@ export function DatePicker() {
     if (searchParams.has("month")) {
       // Parse the "MMMM/yyyy" format properly
       const monthParam = searchParams.get("month")!;
-      return parse(monthParam, "MMMM/yyyy", new Date());
+      const parsedDate = parse(monthParam, "MMMM/yyyy", new Date());
+      // Set to noon to avoid timezone issues
+      return createTimezoneNeutralDate(
+        parsedDate.getFullYear(),
+        parsedDate.getMonth(),
+        1,
+      );
     }
-    return addMonths(new Date(), 0);
+    // Set to noon to avoid timezone issues
+    return getCurrentMonthTimezoneNeutralDate();
   });
 
   const handleMonthChange = (month: Date) => {
