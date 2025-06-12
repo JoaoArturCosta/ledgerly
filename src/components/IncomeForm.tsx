@@ -84,11 +84,7 @@ export default function IncomeForm({ form, onSubmit }: IncomeFormProps) {
                   id="amount"
                   type="number"
                   step="0.01"
-                  value={
-                    field.value === undefined || isNaN(field.value)
-                      ? ""
-                      : field.value
-                  }
+                  value={field.value ?? ""}
                   onChange={(e) => {
                     const value = e.target.valueAsNumber;
                     field.onChange(isNaN(value) ? undefined : value);
