@@ -64,6 +64,15 @@ export function DatePicker() {
           month={month}
           onMonthChange={handleMonthChange}
           initialFocus
+          className="month-picker"
+          classNames={{
+            table: "hidden", // Hide the days table
+            caption:
+              "flex justify-center pt-4 pb-4 relative items-center px-12",
+            nav_button_previous: "absolute left-2",
+            nav_button_next: "absolute right-2",
+            caption_label: "text-sm font-medium mx-4",
+          }}
         />
       </PopoverContent>
     </Popover>
