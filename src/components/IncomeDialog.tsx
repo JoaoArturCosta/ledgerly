@@ -12,7 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -53,6 +53,11 @@ export function IncomeDialog() {
       relatedDate: relatedDate,
     },
   });
+
+  // Update the form's relatedDate when the URL changes
+  useEffect(() => {
+    form.setValue("relatedDate", relatedDate);
+  }, [relatedDate, form]);
 
   const { mutate: submit } = api.income.create.useMutation({
     onSuccess: async ({ incomeCategory }) => {

@@ -136,6 +136,11 @@ export function ExpensesDialog({
     }
   }, [relatedSavingId, form, savingsInvestmentsCategoryId]);
 
+  // Update the form's relatedDate when the URL changes
+  useEffect(() => {
+    form.setValue("relatedDate", relatedDate);
+  }, [relatedDate, form]);
+
   const { mutate: submit } = api.expense.create.useMutation({
     onSuccess: async ({ expenseSubCategory }) => {
       setOpen(false);
