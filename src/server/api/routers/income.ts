@@ -93,7 +93,7 @@ export const incomeRouter = createTRPCRouter({
       const incomesByMonth = incomes.reduce(
         (acc, income) => {
           const month = format(income.relatedDate, "MMMM yyyy");
-          const amount = income.amount;
+          const amount = parseFloat(income.amount);
 
           if (income.isRecurring) {
             for (let i = 0; i < 12; i++) {
