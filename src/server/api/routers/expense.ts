@@ -56,7 +56,7 @@ export const expenseRouter = createTRPCRouter({
       }
 
       const expenseData = {
-        amount: input.amount,
+        amount: input.amount.toString(),
         description: input.description,
         expenseCategoryId: parseInt(input.expenseCategoryId),
         expenseSubCategoryId: parseInt(input.expenseSubCategoryId),
@@ -97,12 +97,16 @@ export const expenseRouter = createTRPCRouter({
             depositAmount = input.amount * months;
           }
 
-          const currentDepositedAmount = relatedSaving.depositedAmount ?? 0;
+          const currentDepositedAmount = parseFloat(
+            relatedSaving.depositedAmount ?? "0",
+          );
 
           await ctx.db
             .update(savings)
             .set({
-              depositedAmount: currentDepositedAmount + depositAmount,
+              depositedAmount: (
+                currentDepositedAmount + depositAmount
+              ).toString(),
             })
             .where(eq(savings.id, savingId));
         }
@@ -184,7 +188,7 @@ export const expenseRouter = createTRPCRouter({
           expense,
         ) => {
           const month = format(expense.relatedDate!, "MMMM");
-          const amount = expense.amount;
+          const amount = parseFloat(expense.amount);
 
           if (expense.isRecurring) {
             for (let i = 0; i < 12; i++) {
@@ -264,7 +268,7 @@ export const expenseRouter = createTRPCRouter({
       const expensesByCategory = expenses.reduce(
         (acc, expense) => {
           const month = format(expense.relatedDate!, "MMMM");
-          const amount = expense.amount;
+          const amount = parseFloat(expense.amount);
 
           if (expense.isRecurring) {
             for (let i = 0; i < 12; i++) {
@@ -338,7 +342,7 @@ export const expenseRouter = createTRPCRouter({
       await ctx.db
         .update(expenses)
         .set({
-          amount: input.amount,
+          amount: input.amount.toString(),
           description: input.description,
           expenseCategoryId: parseInt(input.expenseCategoryId),
           expenseSubCategoryId: parseInt(input.expenseSubCategoryId),

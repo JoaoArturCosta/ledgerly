@@ -35,15 +35,16 @@ export const savingsRouter = createTRPCRouter({
           });
 
           const totalSaved = relatedExpenses.reduce((total, expense) => {
-            return total + expense.amount;
+            return total + parseFloat(expense.amount);
           }, 0);
 
           return {
             ...saving,
-            savedAmount:
-              (saving.startingAmount ?? 0) +
+            savedAmount: (
+              parseFloat(saving.startingAmount ?? "0") +
               totalSaved -
-              (saving.withdrawnAmount ?? 0),
+              parseFloat(saving.withdrawnAmount ?? "0")
+            ).toString(),
           };
         }),
       ),
@@ -88,14 +89,14 @@ export const savingsRouter = createTRPCRouter({
           // Calculate all deposits made up to this month point
           saving.expenses.forEach((expense) => {
             if (expense.relatedDate && expense.relatedDate <= date) {
-              cumulativeDepositsToDate += expense.amount;
+              cumulativeDepositsToDate += parseFloat(expense.amount);
             }
           });
 
           // Calculate all withdrawals made up to this month point
           saving.savingWithdrawals.forEach((withdrawal) => {
             if (withdrawal.createdAt && withdrawal.createdAt <= date) {
-              cumulativeWithdrawalsToDate += withdrawal.amount;
+              cumulativeWithdrawalsToDate += parseFloat(withdrawal.amount);
             }
           });
 
@@ -116,7 +117,7 @@ export const savingsRouter = createTRPCRouter({
               return matchesMonth && matchesYear;
             })
             .reduce((total, expense) => {
-              return total + expense.amount;
+              return total + parseFloat(expense.amount);
             }, 0);
 
           const withdrawalsForMonth = saving.savingWithdrawals
@@ -136,28 +137,36 @@ export const savingsRouter = createTRPCRouter({
               return matchesMonth && matchesYear;
             })
             .reduce((total, withdrawal) => {
-              return total + withdrawal.amount;
+              return total + parseFloat(withdrawal.amount);
             }, 0);
 
           if (!acc[month]) {
             const newMonthValue = {
               [saving.name!]:
-                saving.startingAmount! + depositsForMonth - withdrawalsForMonth,
+                parseFloat(saving.startingAmount!) +
+                depositsForMonth -
+                withdrawalsForMonth,
               Total:
-                saving.startingAmount! + depositsForMonth - withdrawalsForMonth,
+                parseFloat(saving.startingAmount!) +
+                depositsForMonth -
+                withdrawalsForMonth,
             };
 
             acc[month] = newMonthValue;
           } else if (acc[month]) {
             if (!acc[month]![saving.name!]) {
               const savingValue =
-                saving.startingAmount! + depositsForMonth - withdrawalsForMonth;
+                parseFloat(saving.startingAmount!) +
+                depositsForMonth -
+                withdrawalsForMonth;
 
               acc[month]![saving.name!] = savingValue;
             }
 
             const addToTotal =
-              saving.startingAmount! + depositsForMonth - withdrawalsForMonth;
+              parseFloat(saving.startingAmount!) +
+              depositsForMonth -
+              withdrawalsForMonth;
             console.log(`  Adding to Total for ${month}: $${addToTotal}`);
             acc[month]!.Total += addToTotal;
           }
@@ -302,7 +311,7 @@ export const savingsRouter = createTRPCRouter({
           }
 
           // Add the expense amount to the category total
-          acc[categoryName] += expense.amount;
+          acc[categoryName] += parseFloat(expense.amount);
           return acc;
         },
         {} as Record<string, number>,
@@ -321,7 +330,7 @@ export const savingsRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       await ctx.db.insert(savingsWithdrawals).values({
-        amount: input.amount,
+        amount: input.amount.toString(),
         description: input.description,
         savingId: parseInt(input.savingId),
         createdById: ctx.session.user.id,
@@ -338,7 +347,9 @@ export const savingsRouter = createTRPCRouter({
       await ctx.db
         .update(savings)
         .set({
-          withdrawnAmount: (relatedSaving?.withdrawnAmount ?? 0) + input.amount,
+          withdrawnAmount: (
+            parseFloat(relatedSaving?.withdrawnAmount ?? "0") + input.amount
+          ).toString(),
         })
         .where(and(eq(savings.id, parseInt(input.savingId))));
 
@@ -378,15 +389,17 @@ export const savingsRouter = createTRPCRouter({
 
           if (!acc[month]) {
             acc[month] = {
-              [withdrawal.saving.name!]: withdrawal.amount,
-              Total: withdrawal.amount,
+              [withdrawal.saving.name!]: parseFloat(withdrawal.amount),
+              Total: parseFloat(withdrawal.amount),
             };
           } else if (acc[month]) {
             if (!acc[month]![withdrawal.saving.name!]) {
-              acc[month]![withdrawal.saving.name!] = withdrawal.amount;
+              acc[month]![withdrawal.saving.name!] = parseFloat(
+                withdrawal.amount,
+              );
             }
 
-            acc[month]!.Total += withdrawal.amount;
+            acc[month]!.Total += parseFloat(withdrawal.amount);
           }
 
           return acc;
@@ -403,11 +416,11 @@ export const savingsRouter = createTRPCRouter({
         or(
           and(
             eq(savings.createdById, ctx.session.user.id),
-            gt(savings.depositedAmount, 0),
+            gt(savings.depositedAmount, "0"),
           ),
           and(
             eq(savings.createdById, ctx.session.user.id),
-            gt(savings.startingAmount, 0),
+            gt(savings.startingAmount, "0"),
           ),
         ),
       with: {
@@ -428,16 +441,23 @@ export const savingsRouter = createTRPCRouter({
             Withdrawn: 0,
           };
         }
-        acc[savingsCategoryName!]!.Total +=
-          (saving.startingAmount ?? 0) +
-          (saving.depositedAmount ?? 0) -
-          (saving.withdrawnAmount ?? 0);
-        acc[savingsCategoryName!]!.Deposited += saving.depositedAmount ?? 0;
-        acc[savingsCategoryName!]!.Withdrawn += saving.withdrawnAmount ?? 0;
+
+        const category = acc[savingsCategoryName!]!;
+        category.Total +=
+          parseFloat(saving.startingAmount ?? "0") +
+          parseFloat(saving.depositedAmount ?? "0") -
+          parseFloat(saving.withdrawnAmount?.toString() ?? "0");
+        category.Deposited += parseFloat(saving.depositedAmount ?? "0");
+        category.Withdrawn += parseFloat(
+          saving.withdrawnAmount?.toString() ?? "0",
+        );
 
         return acc;
       },
-      {} as Record<string, { Total: number; [key: string]: number }>,
+      {} as Record<
+        string,
+        { Total: number; Deposited: number; Withdrawn: number }
+      >,
     );
 
     return savingsByCategory;
