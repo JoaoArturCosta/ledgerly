@@ -47,7 +47,7 @@ const Expenses = async ({ searchParams }: ExpensesProps) => {
   });
 
   const totalIncome = allIncomesForCurrentMonth.reduce((acc, income) => {
-    return acc + income.amount;
+    return acc + parseFloat(income.amount.toString());
   }, 0);
 
   const allExpensesForCurrentMonth =
@@ -56,7 +56,7 @@ const Expenses = async ({ searchParams }: ExpensesProps) => {
     });
 
   const totalExpenses = allExpensesForCurrentMonth.reduce((acc, expense) => {
-    return acc + expense.amount;
+    return acc + parseFloat(expense.amount.toString());
   }, 0);
 
   const allSavingsForCurrentMonth = await api.savings.getSavingsForMonth.query({

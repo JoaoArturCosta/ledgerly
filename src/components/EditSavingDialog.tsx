@@ -35,11 +35,13 @@ export default function EditSavingDialog({
   const form = useForm<TSavingsValidator>({
     resolver: zodResolver(SavingsValidator),
     defaultValues: {
-      name: saving.name!,
-      finalAmount: saving.finalAmount!,
-      startingAmount: saving.startingAmount!,
+      name: saving.name ?? "",
+      finalAmount: saving.finalAmount
+        ? parseFloat(saving.finalAmount.toString())
+        : undefined,
+      startingAmount: parseFloat(saving.startingAmount?.toString() ?? "0"),
       savingsCategoryId: saving.savingsCategoryId.toString(),
-      endDate: saving.endDate!,
+      endDate: saving.endDate ?? undefined,
     },
   });
 

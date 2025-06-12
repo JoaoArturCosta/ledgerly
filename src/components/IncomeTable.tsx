@@ -39,7 +39,7 @@ export default function IncomeTable({ data }: IncomeTableProps) {
   const router = useRouter();
 
   const totalIncome = data.reduce((acc, income) => {
-    return acc + income.amount;
+    return acc + parseFloat(income.amount.toString());
   }, 0);
 
   const { mutate: deleteIncome } = api.income.delete.useMutation({
@@ -106,7 +106,9 @@ export default function IncomeTable({ data }: IncomeTableProps) {
                 {income.incomeCategory.name}
               </span>
             </TableCell>
-            <TableCell className=" text-right">${income.amount}</TableCell>
+            <TableCell className=" text-right">
+              ${parseFloat(income.amount.toString()).toFixed(2)}
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>
@@ -114,7 +116,9 @@ export default function IncomeTable({ data }: IncomeTableProps) {
         <TableRow>
           <TableCell className="sr-only">Actions</TableCell>
           <TableCell>Total</TableCell>
-          <TableCell className="text-right">${totalIncome}</TableCell>
+          <TableCell className="text-right">
+            ${totalIncome.toFixed(2)}
+          </TableCell>
         </TableRow>
       </TableFooter>
     </Table>

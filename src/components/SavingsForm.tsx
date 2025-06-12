@@ -114,15 +114,20 @@ export default function SavingsForm({
                 <FormControl>
                   <Input
                     id="finalAmount"
-                    {...field}
                     type="number"
-                    required
-                    placeholder="Required"
-                    onChange={(value) =>
-                      field.onChange(value.target.valueAsNumber)
+                    placeholder="Enter your goal amount"
+                    value={
+                      !field.value || isNaN(field.value) ? "" : field.value
                     }
+                    onChange={(e) => {
+                      const value = e.target.valueAsNumber;
+                      field.onChange(isNaN(value) ? 0 : value);
+                    }}
                   />
                 </FormControl>
+                <FormDescription>
+                  The amount you want to save for this goal.
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -140,18 +145,23 @@ export default function SavingsForm({
               <FormControl>
                 <Input
                   id="startingAmount"
-                  {...field}
                   type="number"
-                  placeholder="Required"
-                  onChange={(value) =>
-                    field.onChange(value.target.valueAsNumber)
-                  }
+                  placeholder="Enter starting amount"
+                  value={isNaN(field.value) ? "" : field.value}
+                  onChange={(e) => {
+                    const value = e.target.valueAsNumber;
+                    field.onChange(isNaN(value) ? 0 : value);
+                  }}
                 />
               </FormControl>
+              <FormDescription>
+                The initial amount you&apos;re putting into this saving.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="name"
@@ -161,8 +171,15 @@ export default function SavingsForm({
                 Name <span className="ml-1 text-red-500">*</span>
               </FormLabel>
               <FormControl>
-                <Input id="name" {...field} placeholder="Required" />
+                <Input
+                  id="name"
+                  {...field}
+                  placeholder="Enter a name for your saving"
+                />
               </FormControl>
+              <FormDescription>
+                Give your saving a descriptive name.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -174,7 +191,9 @@ export default function SavingsForm({
             name="endDate"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel>End Date</FormLabel>
+                <FormLabel>
+                  End Date <span className="ml-1 text-red-500">*</span>
+                </FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>

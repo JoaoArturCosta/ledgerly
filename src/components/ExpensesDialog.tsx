@@ -18,7 +18,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
-import { format } from "date-fns";
+import { format, parse } from "date-fns";
 import {
   ExpenseValidator,
   type TExpenseValidator,
@@ -72,8 +72,11 @@ export function ExpensesDialog({
 
   const relatedDate = useMemo(() => {
     if (searchParams.get("month")) {
-      const date = new Date(format(searchParams.get("month")!, "yyyy-MM-dd"));
-      return date;
+      // Parse the "MMMM/yyyy" format from the DatePicker (e.g., "July/2025")
+      const monthParam = searchParams.get("month")!;
+      const parsedDate = parse(monthParam, "MMMM/yyyy", new Date());
+      // Set to the first day of the month for consistency
+      return new Date(parsedDate.getFullYear(), parsedDate.getMonth(), 1);
     }
     return new Date();
   }, [searchParams]);

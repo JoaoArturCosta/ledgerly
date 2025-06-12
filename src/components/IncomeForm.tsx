@@ -82,11 +82,12 @@ export default function IncomeForm({ form, onSubmit }: IncomeFormProps) {
               <FormControl>
                 <Input
                   id="amount"
-                  {...field}
                   type="number"
-                  onChange={(value) =>
-                    field.onChange(value.target.valueAsNumber)
-                  }
+                  value={isNaN(field.value) ? "" : field.value}
+                  onChange={(e) => {
+                    const value = e.target.valueAsNumber;
+                    field.onChange(isNaN(value) ? 0 : value);
+                  }}
                 />
               </FormControl>
               <FormMessage />

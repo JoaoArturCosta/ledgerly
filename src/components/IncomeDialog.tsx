@@ -21,7 +21,7 @@ import {
   type TIncomeValidator,
 } from "@/lib/validators/IncomeValidators";
 import { useRouter, useSearchParams } from "next/navigation";
-import { format } from "date-fns";
+import { format, parse } from "date-fns";
 import IncomeForm from "@/components/IncomeForm";
 
 export function IncomeDialog() {
@@ -33,11 +33,16 @@ export function IncomeDialog() {
 
   const relatedDate = useMemo(() => {
     if (searchParams.get("month")) {
-      const date = new Date(format(searchParams.get("month")!, "yyyy-MM-dd"));
-      return date;
+      // Parse the "MMMM/yyyy" format from the DatePicker (e.g., "July/2025")
+      const monthParam = searchParams.get("month")!;
+      const parsedDate = parse(monthParam, "MMMM/yyyy", new Date());
+      // Set to the first day of the month for consistency
+      return new Date(parsedDate.getFullYear(), parsedDate.getMonth(), 1);
     }
     return new Date();
   }, [searchParams]);
+
+  console.log(relatedDate);
 
   const form = useForm<TIncomeValidator>({
     resolver: zodResolver(IncomeValidator),

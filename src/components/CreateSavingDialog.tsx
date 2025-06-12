@@ -35,7 +35,7 @@ export default function CreateSavingDialog({
     resolver: zodResolver(SavingsValidator),
     defaultValues: {
       name: "",
-      finalAmount: 0,
+      finalAmount: undefined,
       startingAmount: 0,
       savingsCategoryId: "",
       endDate: undefined,

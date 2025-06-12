@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { and, eq } from "drizzle-orm";
 import { format, startOfMonth, subMonths } from "date-fns";
+import { TRPCError } from "@trpc/server";
 
 export const savingsRouter = createTRPCRouter({
   getAllCategories: publicProcedure.query(({ ctx }) => {
@@ -174,24 +175,48 @@ export const savingsRouter = createTRPCRouter({
     .input(
       z.object({
         name: z.string().min(1),
-        finalAmount: z.number().min(1),
+        finalAmount: z.number().min(0.01).optional(),
         startingAmount: z.number().min(0),
         savingsCategoryId: z.string().min(1),
-        endDate: z.date(),
+        endDate: z.date().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      await ctx.db.insert(savings).values({
-        name: input.name,
-        finalAmount: input.finalAmount,
-        startingAmount: input.startingAmount,
-        savingsCategoryId: parseInt(input.savingsCategoryId),
-        endDate: input.endDate,
-        createdById: ctx.session.user.id,
-      });
-
+      // Fetch category to determine requirements
       const category = await ctx.db.query.savingsCategories.findFirst({
         where: (category) => eq(category.id, parseInt(input.savingsCategoryId)),
+      });
+
+      if (!category) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Savings category not found",
+        });
+      }
+
+      // Validate required fields based on category
+      if (category.requiresAmount) {
+        if (!input.finalAmount || input.finalAmount <= 0) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Final amount is required for this savings category",
+          });
+        }
+        if (!input.endDate) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "End date is required for this savings category",
+          });
+        }
+      }
+
+      await ctx.db.insert(savings).values({
+        name: input.name,
+        finalAmount: input.finalAmount?.toString() ?? null,
+        startingAmount: input.startingAmount.toString(),
+        savingsCategoryId: parseInt(input.savingsCategoryId),
+        endDate: input.endDate ?? null,
+        createdById: ctx.session.user.id,
       });
 
       return { success: true, savingsCategory: category };

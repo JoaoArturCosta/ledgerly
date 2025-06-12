@@ -46,14 +46,24 @@ export const incomeRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
+      const year = input.relatedDate.getFullYear();
+      const month = input.relatedDate.getMonth();
+
       const incomes = await ctx.db.query.incomes.findMany({
-        where: (incomes, { and, eq, or }) =>
+        where: (incomes, { and, eq, or, between }) =>
           or(
             and(
               eq(incomes.createdById, ctx.session.user.id),
-              eq(incomes.relatedDate, input.relatedDate),
+              between(
+                incomes.relatedDate,
+                new Date(year, month, 1),
+                new Date(year, month + 1, 0), // Last day of the month
+              ),
             ),
-            eq(incomes.isRecurring, true),
+            and(
+              eq(incomes.createdById, ctx.session.user.id),
+              eq(incomes.isRecurring, true),
+            ),
           ),
         with: {
           incomeCategory: true,

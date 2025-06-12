@@ -1,7 +1,7 @@
 "use client";
 
 import { CalendarIcon } from "@radix-ui/react-icons";
-import { addMonths, format } from "date-fns";
+import { addMonths, format, parse } from "date-fns";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -19,13 +19,14 @@ export function DatePicker() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const [month, setMonth] = useState<Date>(
-    new Date(
-      searchParams.has("month")
-        ? searchParams.get("month")!
-        : addMonths(new Date(), 0),
-    ),
-  );
+  const [month, setMonth] = useState<Date>(() => {
+    if (searchParams.has("month")) {
+      // Parse the "MMMM/yyyy" format properly
+      const monthParam = searchParams.get("month")!;
+      return parse(monthParam, "MMMM/yyyy", new Date());
+    }
+    return addMonths(new Date(), 0);
+  });
 
   const handleMonthChange = (month: Date) => {
     router.push(`${pathname}?month=${format(month, "MMMM/yyyy")}`);

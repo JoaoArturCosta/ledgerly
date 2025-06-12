@@ -314,7 +314,7 @@ export const defaultSavingsCategories: Omit<
   {
     name: "Retirement",
     iconFaName: "umbrella-beach",
-    requiresAmount: true,
+    requiresAmount: false,
     createdById: "system",
   },
   {
