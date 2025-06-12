@@ -25,7 +25,7 @@ export default function PricingPage() {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
   const createCheckoutSession =
-    api.subscription.createCheckoutSession.useMutation({
+    api.subscriptions.createCheckoutSession.useMutation({
       onSuccess: (data) => {
         if (data.checkoutUrl) {
           window.location.href = data.checkoutUrl;

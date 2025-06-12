@@ -15,7 +15,7 @@ export const appRouter = createTRPCRouter({
   income: incomeRouter,
   savings: savingsRouter,
   banking: bankingRouter,
-  subscription: subscriptionRouter,
+  subscriptions: subscriptionRouter,
 });
 
 // export type definition of API

@@ -23,14 +23,16 @@ type Props = {
 
 export function UserNav({ isCollapsed, user }: Props) {
   const { data: subscription } =
-    api.subscription.getCurrentSubscription.useQuery();
-  const createPortalSession = api.subscription.createPortalSession.useMutation({
-    onSuccess: (data) => {
-      if (data.portalUrl) {
-        window.location.href = data.portalUrl;
-      }
+    api.subscriptions.getCurrentSubscription.useQuery();
+  const createPortalSession = api.subscriptions.createPortalSession.useMutation(
+    {
+      onSuccess: (data) => {
+        if (data.portalUrl) {
+          window.location.href = data.portalUrl;
+        }
+      },
     },
-  });
+  );
 
   const handleManageBilling = () => {
     createPortalSession.mutate();

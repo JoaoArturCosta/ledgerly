@@ -168,7 +168,7 @@ const Expenses = async ({ searchParams }: ExpensesProps) => {
               </span>
             </CardTitle>
             <CardDescription className="text-normal text-3xl font-bold">
-              ${(totalIncome - (totalExpenses + totalSavings)).toFixed(2)}
+              ${(totalIncome - totalExpenses).toFixed(2)}
               <p className="text-xs font-normal text-muted-foreground">
                 Total Allocated ${(totalExpenses + totalSavings).toFixed(2)}
               </p>

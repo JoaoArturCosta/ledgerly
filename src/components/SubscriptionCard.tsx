@@ -22,23 +22,25 @@ export function SubscriptionCard() {
   const router = useRouter();
 
   const { data: subscription } =
-    api.subscription.getCurrentSubscription.useQuery();
-  const { data: usage } = api.subscription.getUsage.useQuery();
+    api.subscriptions.getCurrentSubscription.useQuery();
+  const { data: usage } = api.subscriptions.getUsage.useQuery();
 
-  const createPortalSession = api.subscription.createPortalSession.useMutation({
-    onSuccess: (data) => {
-      if (data.portalUrl) {
-        window.location.href = data.portalUrl;
-      }
+  const createPortalSession = api.subscriptions.createPortalSession.useMutation(
+    {
+      onSuccess: (data) => {
+        if (data.portalUrl) {
+          window.location.href = data.portalUrl;
+        }
+      },
+      onError: (error) => {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      },
     },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
+  );
 
   if (!session || !subscription) {
     return null;
