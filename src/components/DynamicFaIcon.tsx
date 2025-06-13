@@ -1,4 +1,4 @@
-import * as Icons from "react-icons/fa6";
+import * as Icons from "react-icons/fa";
 import { type IconBaseProps } from "react-icons/lib";
 
 interface DynamicFaIconProps {
@@ -13,9 +13,9 @@ export function DynamicFaIcon({ name, className }: DynamicFaIconProps) {
     return <Icons.FaQuestion className={className} />;
   }
 
-  // Convert kebab-case to PascalCase for FontAwesome 6 icons
-  // e.g., "life-ring" -> "FaLifeRing"
-  const convertToPascalCase = (str: string): string => {
+  // If the name already starts with 'Fa', use it directly; otherwise, convert to PascalCase
+  const getIconName = (str: string): string => {
+    if (str.startsWith("Fa")) return str;
     return (
       "Fa" +
       str
@@ -25,7 +25,8 @@ export function DynamicFaIcon({ name, className }: DynamicFaIconProps) {
     );
   };
 
-  const iconName = convertToPascalCase(name);
+  const iconName = getIconName(name);
+
   const IconComponent = Icons[
     iconName as keyof typeof Icons
   ] as React.ComponentType<IconBaseProps>;

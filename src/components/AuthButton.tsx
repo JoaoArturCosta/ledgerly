@@ -7,17 +7,21 @@ import { AUTH_PROVIDER_ICONS } from "./constants/icons";
 
 interface AuthButtonProps {
   provider: ClientSafeProvider;
+  className?: string;
 }
 
-export default function AuthButton({ provider }: AuthButtonProps) {
+export default function AuthButton({ provider, className }: AuthButtonProps) {
+  const iconKey = provider.id.toLowerCase();
+  const iconName = AUTH_PROVIDER_ICONS[iconKey]?.faIconName || null;
+
   return (
     <Button
       variant="outline"
-      className="w-full p-4"
+      className={className ? className : "w-full p-4"}
       onClick={() => signIn(provider.id, { callbackUrl: "/dashboard" })}
     >
       <span className="flex items-center gap-2 text-nowrap p-4">
-        <DynamicFaIcon name={AUTH_PROVIDER_ICONS[provider.name]!.faIconName} />
+        <DynamicFaIcon name={iconName} />
         {provider.name}
       </span>
     </Button>

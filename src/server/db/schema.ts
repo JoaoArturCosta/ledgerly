@@ -226,6 +226,7 @@ export const users = pgTable("user", {
     "active",
   ),
   stripeCustomerId: varchar("stripe_customer_id", { length: 255 }),
+  password: varchar("password", { length: 255 }),
 });
 
 export type User = InferSelectModel<typeof users>;

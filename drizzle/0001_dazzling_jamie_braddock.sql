@@ -1,0 +1,1 @@
+ALTER TABLE "kleero_user" ADD COLUMN "password" varchar(255);

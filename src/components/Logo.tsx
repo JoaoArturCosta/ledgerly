@@ -57,7 +57,7 @@ export default function Logo({
           )}
           style={{ letterSpacing: "-0.05em" }}
         >
-          Kleero®
+          Kleeru®
         </span>
       )}
     </div>

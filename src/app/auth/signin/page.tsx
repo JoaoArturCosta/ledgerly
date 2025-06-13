@@ -1,52 +1,49 @@
-import AuthButton from "@/components/AuthButton";
 import Logo from "@/components/Logo";
-import { Separator } from "@/components/ui/separator";
-import { getServerAuthSession } from "@/server/auth";
-import { getProviders } from "next-auth/react";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import SignInForm from "./SignInForm";
+import { getProviders } from "next-auth/react";
+import { Plus } from "lucide-react";
 
 export default async function SignIn() {
-  const session = await getServerAuthSession();
-
   const providers = await getProviders();
 
-  console.log(providers);
-
-  if (session?.user) {
-    redirect("/dashboard");
-  }
-
   return (
-    <section className="grid h-screen w-screen grid-cols-2">
-      <div className="col-span-1 bg-primary">
-        <div className="flex w-full items-center p-6">
-          <Logo variant="signin" className="gap-3" />
+    <div className="grid h-screen w-screen grid-cols-1 md:grid-cols-2">
+      {/* Left: Branding */}
+      <div className="relative flex flex-col justify-center bg-gradient-to-br from-purple-600 to-purple-500 p-12 text-white">
+        <div className="mb-12 flex items-center">
+          <Logo variant="signin" className="gap-3 text-white" />
+        </div>
+        <div className="flex flex-1 flex-col items-start justify-center">
+          <div className="mb-8">
+            <Plus className="mb-8 h-16 w-16 opacity-80" />
+            <h1 className="mb-4 text-3xl font-bold md:text-4xl">
+              Start your journey with Kleero
+            </h1>
+            <p className="text-lg opacity-90">
+              Access all your tools and resources in one place. Simplify your
+              workflow and boost productivity.
+            </p>
+          </div>
         </div>
       </div>
-      <div className="col-span-1 flex  flex-col items-center justify-center">
-        <div className="flex w-[50%] flex-col items-center justify-center gap-2">
-          <h2 className="text-3xl font-semibold ">Sign In</h2>
-          <div className="flex items-center justify-center gap-2 pt-6">
-            <Separator />
-            <span className="text-nowrap text-xs font-light uppercase text-muted-foreground">
-              or continue with
-            </span>
-            <Separator />
-          </div>
-          <div className="flex w-full flex-col items-center justify-center gap-4 pt-6">
-            {providers &&
-              Object.values(providers).map((provider) => (
-                <AuthButton key={provider.id} provider={provider} />
-              ))}
-          </div>
+      {/* Right: Sign In Card */}
+      <div className="flex flex-col items-center justify-center bg-white">
+        <div className="mx-auto w-full max-w-md rounded-lg p-8 shadow-lg">
+          <SignInForm providers={providers} />
         </div>
-        <div>
+        <div className="mt-4 px-4 text-center text-xs text-muted-foreground">
           By clicking continue, you agree to our{" "}
-          <Link href={"/"}>Terms of Service</Link> and{" "}
-          <Link href={"/"}>Privacy Policy</Link>.
+          <Link href="/" className="underline">
+            Terms of Service
+          </Link>{" "}
+          and{" "}
+          <Link href="/" className="underline">
+            Privacy Policy
+          </Link>
+          .
         </div>
       </div>
-    </section>
+    </div>
   );
 }

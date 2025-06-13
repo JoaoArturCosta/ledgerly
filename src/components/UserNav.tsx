@@ -99,7 +99,7 @@ export function UserNav({ isCollapsed, user }: Props) {
             variant="outline"
             className="w-full"
             onClick={() => {
-              void signOut();
+              void signOut({ callbackUrl: "/" });
             }}
           >
             <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />

@@ -1,9 +1,9 @@
 export const AUTH_PROVIDER_ICONS = {
-  Discord: {
-    faIconName: "FaDiscord",
-  },
-  Google: {
+  google: {
     faIconName: "FaGoogle",
+  },
+  discord: {
+    faIconName: "FaDiscord",
   },
 } as Record<
   string,

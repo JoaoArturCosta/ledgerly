@@ -7,12 +7,15 @@ import {
 import { type Adapter } from "next-auth/adapters";
 import DiscordProvider from "next-auth/providers/discord";
 import GoogleProvider from "next-auth/providers/google";
-
+import CredentialsProvider from "next-auth/providers/credentials";
+import { verificationTokens } from "@/server/db/schema";
+import { eq, and } from "drizzle-orm";
+import { PLAN_LIMITS, type SubscriptionPlan } from "@/lib/stripe-config";
+import bcrypt from "bcrypt";
 import { env } from "@/env";
 import { db } from "@/server/db";
-import { pgTable, users } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
-import { PLAN_LIMITS, type SubscriptionPlan } from "@/lib/stripe-config";
+import { users } from "@/server/db/schema";
+import { Resend } from "resend";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -72,7 +75,7 @@ export const authOptions: NextAuthOptions = {
       };
     },
   },
-  adapter: DrizzleAdapter(db, pgTable) as Adapter,
+  adapter: DrizzleAdapter(db) as Adapter,
   providers: [
     // Only add Google provider if credentials are available
     ...(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
@@ -93,6 +96,119 @@ export const authOptions: NextAuthOptions = {
           }),
         ]
       : []),
+
+    // Credentials provider for email/password
+    CredentialsProvider({
+      name: "Email and Password",
+      credentials: {
+        email: {
+          label: "Email",
+          type: "email",
+          placeholder: "email@example.com",
+        },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error("Missing email or password");
+        }
+        const email = credentials.email.toLowerCase();
+        const password = credentials.password;
+
+        // Rate limiting
+        const now = Date.now();
+        const rl = rateLimitMap.get(email) || { count: 0, lastAttempt: 0 };
+        if (
+          now - rl.lastAttempt < RATE_LIMIT_WINDOW &&
+          rl.count >= RATE_LIMIT_MAX
+        ) {
+          throw new Error("Too many attempts. Please try again later.");
+        }
+        if (now - rl.lastAttempt > RATE_LIMIT_WINDOW) {
+          rl.count = 0;
+        }
+        rl.count++;
+        rl.lastAttempt = now;
+        rateLimitMap.set(email, rl);
+
+        // Find user by email
+        let user = await db.query.users.findFirst({
+          where: eq(users.email, email),
+        });
+
+        if (user) {
+          // User exists: check password
+          if (!user.password) {
+            throw new Error("Account does not support password login.");
+          }
+          const passwordMatch = await bcrypt.compare(password, user.password);
+          if (!passwordMatch) {
+            throw new Error("Invalid email or password.");
+          }
+          // Check email verification
+          if (!user.emailVerified) {
+            // Resend verification email
+            const token = generateToken();
+            const expires = new Date(Date.now() + 1000 * 60 * 60 * 24); // 24h
+            // Delete existing token and insert new one
+            await db
+              .delete(verificationTokens)
+              .where(eq(verificationTokens.identifier, email));
+            await db
+              .insert(verificationTokens)
+              .values({ identifier: email, token, expires });
+            try {
+              await sendVerificationEmail(email, token);
+            } catch (emailError) {
+              console.error("Failed to send verification email:", emailError);
+              // Still throw the original error to inform user
+            }
+            throw new Error("Email not verified. Verification email resent.");
+          }
+          // Success
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+          };
+        } else {
+          // Register new user
+          const hashed = await bcrypt.hash(password, 10);
+          const name = email.split("@")[0];
+          // Insert user
+          const [newUser] = await db
+            .insert(users)
+            .values({
+              id: crypto.randomUUID(),
+              email,
+              password: hashed,
+              name,
+              emailVerified: null,
+            })
+            .returning();
+          // Generate and store verification token
+          const token = generateToken();
+          const expires = new Date(Date.now() + 1000 * 60 * 60 * 24); // 24h
+          await db.insert(verificationTokens).values({
+            identifier: email,
+            token,
+            expires,
+          });
+          try {
+            await sendVerificationEmail(email, token);
+          } catch (emailError) {
+            console.error(
+              "Failed to send verification email for new user:",
+              emailError,
+            );
+            // Still throw the original error to inform user
+          }
+          throw new Error(
+            "Account created. Please verify your email. Verification email sent.",
+          );
+        }
+      },
+    }),
 
     /**
      * ...add more providers here.
@@ -119,3 +235,40 @@ export const authOptions: NextAuthOptions = {
  * @see https://next-auth.js.org/configuration/nextjs
  */
 export const getServerAuthSession = () => getServerSession(authOptions);
+
+// Helper to send verification email
+async function sendVerificationEmail(email: string, token: string) {
+  try {
+    // Check if RESEND_API_KEY is available
+    if (!env.RESEND_API_KEY) {
+      throw new Error("Email service not configured");
+    }
+
+    const resend = new Resend(env.RESEND_API_KEY);
+    const verifyUrl = `${env.NEXTAUTH_URL}/api/auth/verify?token=${token}&email=${encodeURIComponent(email)}`;
+
+    const result = await resend.emails.send({
+      from: "no-reply@kleeru.app", // Use your verified sender
+      to: email,
+      subject: "Verify your email for Kleeru",
+      html: `<p>Click the link below to verify your email address:</p><p><a href='${verifyUrl}'>Verify Email</a></p><p>If you did not request this, you can ignore this email.</p>`,
+    });
+
+    return result;
+  } catch (error) {
+    console.error("Failed to send verification email:", error);
+    throw error;
+  }
+}
+
+// In-memory rate limiter
+const rateLimitMap = new Map<string, { count: number; lastAttempt: number }>();
+const RATE_LIMIT_WINDOW = 10 * 60 * 1000; // 10 minutes
+const RATE_LIMIT_MAX = 5;
+
+// Helper to generate a random token
+function generateToken(length = 32) {
+  return Array.from({ length }, () =>
+    Math.floor(Math.random() * 36).toString(36),
+  ).join("");
+}
