@@ -1,4 +1,4 @@
-import { DataBarChart } from "@/components/DataBarChart";
+import { DataBarChart, type IBarChartData } from "@/components/DataBarChart";
 import DataLineChart from "@/components/DataLineChart";
 import { IncomeDialog } from "@/components/IncomeDialog";
 import IncomeTable from "@/components/IncomeTable";
@@ -6,7 +6,6 @@ import Layout from "@/components/Layout";
 import { VIEWS_LIST } from "@/components/constants/expenses";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/trpc/server";
-import { type IBarChartData } from "@/types";
 import { format } from "date-fns";
 import { DollarSign } from "lucide-react";
 import { useMemo } from "react";
@@ -62,9 +61,13 @@ export async function Income({ searchParams }: ExpensesProps) {
   const barChartData = allIncomesForCurrentMonth.reduce(
     (acc: IBarChartData[], income) => {
       const incomeCategory = income.incomeCategory.name!;
-      const amount = income.amount;
+      const amount = Math.round(parseFloat(income.amount) * 100) / 100; // Fix floating-point precision
 
-      if (acc.some((item) => item.name === incomeCategory) === false) {
+      const existingIndex = acc.findIndex(
+        (item) => item.name === incomeCategory,
+      );
+
+      if (existingIndex === -1) {
         return [
           ...acc,
           {
@@ -74,17 +77,14 @@ export async function Income({ searchParams }: ExpensesProps) {
         ];
       }
 
-      const index = acc.findIndex((item) => item.name === incomeCategory);
-
-      if (acc[index] === undefined) {
-        return acc;
-      }
-
-      acc[index]!.Total += amount;
-
-      return acc;
+      // Update existing entry
+      const updatedAcc = [...acc];
+      updatedAcc[existingIndex] = {
+        ...updatedAcc[existingIndex]!,
+        Total: updatedAcc[existingIndex]!.Total + amount,
+      };
+      return updatedAcc;
     },
-
     [] as IBarChartData[],
   );
 
@@ -115,7 +115,12 @@ export async function Income({ searchParams }: ExpensesProps) {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <DataBarChart data={barChartData} height={240} />
+              <DataBarChart
+                data={barChartData}
+                categoryKey="name"
+                valueKey="Total"
+                height={240}
+              />
             </CardContent>
           </Card>
           <Card>

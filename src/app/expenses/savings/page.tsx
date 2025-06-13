@@ -1,5 +1,5 @@
 import CreateSavingDialog from "@/components/CreateSavingDialog";
-import { DataBarChart } from "@/components/DataBarChart";
+import { DataBarChart, type IBarChartData } from "@/components/DataBarChart";
 import DataLineChart from "@/components/DataLineChart";
 import { ExpensesDialog } from "@/components/ExpensesDialog";
 import Layout from "@/components/Layout";
@@ -7,7 +7,6 @@ import SavingsCarousel from "@/components/SavingsCarousel";
 import { VIEWS_LIST } from "@/components/constants/expenses";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/trpc/server";
-import { type IBarChartData } from "@/types";
 import { format } from "date-fns";
 import { Receipt } from "lucide-react";
 import React, { useMemo } from "react";
@@ -61,9 +60,13 @@ export default async function Savings({ searchParams }: SavingsProps) {
   const allSavingsBarChartData = allSavings.reduce(
     (acc: IBarChartData[], saving) => {
       const savingCategory = saving.savingsCategory.name!;
-      const amount = saving.savedAmount;
+      const amount = Math.round(parseFloat(saving.savedAmount) * 100) / 100; // Fix floating-point precision
 
-      if (acc.some((item) => item.name === savingCategory) === false) {
+      const existingIndex = acc.findIndex(
+        (item) => item.name === savingCategory,
+      );
+
+      if (existingIndex === -1) {
         return [
           ...acc,
           {
@@ -73,15 +76,13 @@ export default async function Savings({ searchParams }: SavingsProps) {
         ];
       }
 
-      const index = acc.findIndex((item) => item.name === savingCategory);
-
-      if (acc[index] === undefined) {
-        return acc;
-      }
-
-      acc[index]!.Total += amount;
-
-      return acc;
+      // Update existing entry
+      const updatedAcc = [...acc];
+      updatedAcc[existingIndex] = {
+        ...updatedAcc[existingIndex]!,
+        Total: updatedAcc[existingIndex]!.Total + amount,
+      };
+      return updatedAcc;
     },
     [] as IBarChartData[],
   );
@@ -91,7 +92,7 @@ export default async function Savings({ searchParams }: SavingsProps) {
   ).map((saving) => {
     return {
       name: saving[0],
-      Total: saving[1],
+      Total: Math.round(saving[1] * 100) / 100, // Fix floating-point precision
     };
   });
 
@@ -113,7 +114,12 @@ export default async function Savings({ searchParams }: SavingsProps) {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <DataBarChart data={allSavingsBarChartData} height={150} />
+              <DataBarChart
+                data={allSavingsBarChartData}
+                categoryKey="name"
+                valueKey="Total"
+                height={150}
+              />
             </CardContent>
           </Card>
           <Card>
@@ -143,6 +149,8 @@ export default async function Savings({ searchParams }: SavingsProps) {
           <CardContent>
             <DataBarChart
               data={savingsForCurrentMonthBarChartData}
+              categoryKey="name"
+              valueKey="Total"
               height={380}
             />
           </CardContent>

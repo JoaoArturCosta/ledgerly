@@ -9,11 +9,5 @@ export interface NavItem {
   children?: NavItem[];
 }
 
-export interface IBarChartData {
-  name: string;
-  // [key: string]: number | string;
-  Total: number;
-}
-
 export type ArrayElement<ArrayType extends readonly unknown[]> =
   ArrayType extends readonly (infer ElementType)[] ? ElementType : never;

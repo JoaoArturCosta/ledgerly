@@ -1,4 +1,4 @@
-import { DataBarChart } from "@/components/DataBarChart";
+import { DataBarChart, type IBarChartData } from "@/components/DataBarChart";
 import DataLineChart from "@/components/DataLineChart";
 import { ExpensesDialog } from "@/components/ExpensesDialog";
 import { Columns } from "@/components/DataTable/Definitions/ExpensesColumns";
@@ -7,7 +7,6 @@ import Layout from "@/components/Layout";
 import { VIEWS_LIST } from "@/components/constants/expenses";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/trpc/server";
-import { type IBarChartData } from "@/types";
 import { format } from "date-fns";
 import { Receipt } from "lucide-react";
 import { useMemo } from "react";
@@ -46,9 +45,13 @@ export default async function Expenses({ searchParams }: ExpensesProps) {
   const barChartData = allExpensesForCurrentMonth.reduce(
     (acc: IBarChartData[], expense) => {
       const expenseCategory = expense.expenseCategory.name!;
-      const amount = expense.amount;
+      const amount = Math.round(parseFloat(expense.amount) * 100) / 100; // Fix floating-point precision
 
-      if (acc.some((item) => item.name === expenseCategory) === false) {
+      const existingIndex = acc.findIndex(
+        (item) => item.name === expenseCategory,
+      );
+
+      if (existingIndex === -1) {
         return [
           ...acc,
           {
@@ -58,13 +61,13 @@ export default async function Expenses({ searchParams }: ExpensesProps) {
         ];
       }
 
-      const index = acc.findIndex((item) => item.name === expenseCategory);
-
-      if (acc[index] === undefined) {
-        return acc;
-      }
-
-      return acc;
+      // Update existing entry
+      const updatedAcc = [...acc];
+      updatedAcc[existingIndex] = {
+        ...updatedAcc[existingIndex]!,
+        Total: updatedAcc[existingIndex]!.Total + amount,
+      };
+      return updatedAcc;
     },
     [] as IBarChartData[],
   );
@@ -117,7 +120,12 @@ export default async function Expenses({ searchParams }: ExpensesProps) {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <DataBarChart data={barChartData} height={240} />
+              <DataBarChart
+                data={barChartData}
+                categoryKey="name"
+                valueKey="Total"
+                height={240}
+              />
             </CardContent>
           </Card>
           <Card>

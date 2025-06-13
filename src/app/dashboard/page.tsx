@@ -104,7 +104,7 @@ export default async function Dashboard({ searchParams }: DashboardProps) {
     (expense) => {
       return {
         name: expense[0],
-        Total: expense[1]?.Total ?? 0,
+        Total: Math.round((expense[1]?.Total ?? 0) * 100) / 100, // Fix floating-point precision
       };
     },
   );
@@ -122,7 +122,7 @@ export default async function Dashboard({ searchParams }: DashboardProps) {
     (saving) => {
       return {
         name: saving[0],
-        Total: saving[1]?.Total ?? 0,
+        Total: Math.round((saving[1]?.Total ?? 0) * 100) / 100, // Fix floating-point precision
       };
     },
   );
@@ -201,10 +201,10 @@ export default async function Dashboard({ searchParams }: DashboardProps) {
           <CardContent>
             <DataBarChart
               data={expensesBarChartData}
-              height={178}
+              categoryKey="name"
+              valueKey="Total"
               orientation="vertical"
-              xDataKey="Total"
-              yDataKey="name"
+              height={178}
             />
           </CardContent>
         </Card>
@@ -223,10 +223,10 @@ export default async function Dashboard({ searchParams }: DashboardProps) {
           <CardContent>
             <DataBarChart
               data={savingsBarChartData}
-              height={178}
+              categoryKey="name"
+              valueKey="Total"
               orientation="vertical"
-              xDataKey="Total"
-              yDataKey="name"
+              height={178}
             />
           </CardContent>
         </Card>

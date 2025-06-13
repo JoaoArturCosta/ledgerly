@@ -110,19 +110,20 @@ const Expenses = async ({ searchParams }: ExpensesProps) => {
   const barChartData = [
     {
       name: "Income",
-      Total: totalIncome,
+      Total: Math.round(totalIncome * 100) / 100, // Fix floating-point precision
     },
     {
       name: "Expenses",
-      Total: totalExpenses,
+      Total: Math.round(totalExpenses * 100) / 100,
     },
     {
       name: "Savings",
-      Total: totalSavings,
+      Total: Math.round(totalSavings * 100) / 100,
     },
     {
       name: "Unallocated",
-      Total: totalIncome - (totalExpenses + totalSavings),
+      Total:
+        Math.round((totalIncome - (totalExpenses + totalSavings)) * 100) / 100,
     },
   ];
 
@@ -185,6 +186,8 @@ const Expenses = async ({ searchParams }: ExpensesProps) => {
             <CardContent>
               <DataBarChart
                 data={barChartData}
+                categoryKey="name"
+                valueKey="Total"
                 height={400}
                 truncateLabel={false}
               />
