@@ -23,7 +23,7 @@ export const env = createEnv({
       process.env.VERCEL ? z.string().min(1) : z.string().url(),
     ),
 
-    // OAuth Providers
+    // OAuth Providers (optional but must be provided together)
     GOOGLE_CLIENT_ID: z.string().optional(),
     GOOGLE_CLIENT_SECRET: z.string().optional(),
     DISCORD_CLIENT_ID: z.string().optional(),
@@ -47,8 +47,11 @@ export const env = createEnv({
     // Stripe configuration
     STRIPE_SECRET_KEY: z.string().optional(),
     STRIPE_WEBHOOK_SECRET: z.string().optional(),
-    // Resend configuration
-    RESEND_API_KEY: z.string().min(1),
+    // Resend configuration (only required in production for email features)
+    RESEND_API_KEY:
+      process.env.NODE_ENV === "production"
+        ? z.string().min(1, "RESEND_API_KEY is required in production")
+        : z.string().optional().default("dev_mock_key"),
   },
 
   /**
