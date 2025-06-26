@@ -268,19 +268,19 @@ export const savingsRouter = createTRPCRouter({
 
       const expenses = await ctx.db.query.expenses.findMany({
         where: (expenses, { and, eq, or, between }) =>
-          or(
-            and(
-              eq(expenses.createdById, ctx.session.user.id),
-              between(
-                expenses.relatedDate,
-                new Date(year, month, 1),
-                new Date(year, month, 31),
+          and(
+            eq(expenses.createdById, ctx.session.user.id),
+            eq(expenses.expenseCategoryId, savingsInvestmentsCategory.id),
+            or(
+              and(
+                between(
+                  expenses.relatedDate,
+                  new Date(year, month, 1),
+                  new Date(year, month, 31),
+                ),
+                eq(expenses.isRecurring, false),
               ),
-              eq(expenses.expenseCategoryId, savingsInvestmentsCategory.id),
-            ),
-            and(
               eq(expenses.isRecurring, true),
-              eq(expenses.expenseCategoryId, savingsInvestmentsCategory.id),
             ),
           ),
         with: {
